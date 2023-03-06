@@ -6,6 +6,7 @@ open import Categories.Object.Terminal
 import Categories.Morphism.Reasoning as MR
 open import Categories.Functor renaming (id to idF)
 open import Categories.Category.Cartesian.Bundle
+open import Categories.Category.BinaryProducts
 
 module Mealy {o l e} (C : CartesianCategory o l e) where
 
@@ -43,11 +44,10 @@ Mealy I O = record
   ; _≈_ = λ f g → hom f ≈ hom g
   ; id = λ {A} → let module A = MealyObj A in
     record { hom = id
-           ; comm-d = identityˡ ○ introʳ
-           first-identity
+           ; comm-d = identityˡ ○ introʳ first-identity
            ; comm-s = introʳ first-identity
            }
-  ; _∘_ = λ {_} {_} {A} {B} {C} f g →
+  ; _∘_ = λ {A} {B} {C} g f →
     let
       module f = Mealy⇒ f
       module g = Mealy⇒ g
@@ -56,13 +56,13 @@ Mealy I O = record
       module C = MealyObj C in record
     { hom = g.hom ∘ f.hom
     ; comm-d = begin (g.hom ∘ f.hom) ∘ A.d ≈⟨ pullʳ f.comm-d ⟩
-                    g.hom ∘ B.d ∘ first f.hom ≈⟨ pullˡ g.comm-d ⟩
-                    (C.d ∘ first g.hom) ∘ first f.hom ≈⟨ pullʳ first∘first ⟩
-                    C.d ∘ first (g.hom ∘ f.hom) ∎
+                     g.hom ∘ B.d ∘ first f.hom ≈⟨ pullˡ g.comm-d ⟩
+                     (C.d ∘ first g.hom) ∘ first f.hom ≈⟨ pullʳ first∘first ⟩
+                     C.d ∘ first (g.hom ∘ f.hom) ∎
     ; comm-s = begin A.s ≈⟨ f.comm-s ⟩
-                    B.s ∘ first f.hom ≈⟨ g.comm-s ⟩∘⟨refl ⟩
-                    (C.s ∘ first g.hom) ∘ first f.hom ≈⟨ pullʳ first∘first ⟩
-                    C.s ∘ first (g.hom ∘ f.hom) ∎
+                     B.s ∘ first f.hom ≈⟨ g.comm-s ⟩∘⟨refl ⟩
+                     (C.s ∘ first g.hom) ∘ first f.hom ≈⟨ pullʳ first∘first ⟩
+                     C.s ∘ first (g.hom ∘ f.hom) ∎
     }
   ; assoc = assoc
   ; sym-assoc = sym-assoc

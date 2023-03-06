@@ -3,7 +3,7 @@ open import Data.Unit
 open import Data.Product
 open import Data.Nat
 open import Categories.Object.Terminal
-open import Categories.Object.Product.Indexed
+open import Categories.Object.Product.IndeFed
 open import Categories.Object.Product
 open import Categories.NaturalTransformation using (ntHelper)
 open import Categories.Functor.Slice
@@ -24,10 +24,10 @@ import Function as Fun
 import Categories.Morphism.Reasoning as MR
 import Categories.Category.Complete
 
-module XMoore.Adjoints {o l e} {C : Category o l e} {X : Functor C C} (O : Category.Obj C) where
+module FMoore.Adjoints {o l e} {C : Category o l e} {F : Functor C C} (O : Category.Obj C) where
 
 open import Categories.Adjoint
-open import XMoore {o} {l} {e} {C} {X} O
+open import FMoore {o} {l} {e} {C} {F} O
 open Category C
 open HomReasoning
 open Equiv
@@ -35,10 +35,10 @@ pattern * = lift Data.Unit.tt
 
 {-
 -- output functor
-Bout : Functor XMoore (F ↘ O)
+Bout : Functor FMoore (F ↘ O)
 Bout = record
-  { F₀ = λ { A → let module A = XMooreObj A in record { f = A.s ∘ A.d } }
-  ; F₁ = λ { F → let module F = XMoore⇒ F in record
+  { F₀ = λ { A → let module A = FMooreObj A in record { f = A.s ∘ A.d } }
+  ; F₁ = λ { F → let module F = FMoore⇒ F in record
     { g = F.hom
     ; h = *
     ; commute = begin _ ≈⟨ identityˡ ○ F.comm-s ⟩∘⟨refl ⟩
@@ -47,37 +47,37 @@ Bout = record
     }}
   ; identity = refl , *
   ; homomorphism = refl , *
-  ; F-resp-≈ = λ x → x , *
+  ; F-resp-≈ = λ F → F , *
   }
 
 -- in order to find a left adjoint to Bout we first have to define
--- an adjunction between Alg(F) and C: XMre has functors
--- Alg(F) <-pAlg- XMre -pSlice-> F/O
-pAlg : Functor XMoore (F-Algebras F)
+-- an adjunction between Alg(F) and C: FMre has functors
+-- Alg(F) <-pAlg- FMre -pSlice-> F/O
+pAlg : Functor FMoore (F-Algebras F)
 pAlg = record
-  { F₀ = λ { A → let module A = XMooreObj A in record { A = A.E ; α = A.d }}
-  ; F₁ = λ { F → let module F = XMoore⇒ F in record { f = F.hom ; commutes = F.comm-d }}
+  { F₀ = λ { A → let module A = FMooreObj A in record { A = A.E ; α = A.d }}
+  ; F₁ = λ { F → let module F = FMoore⇒ F in record { f = F.hom ; commutes = F.comm-d }}
   ; identity = refl
   ; homomorphism = refl
-  ; F-resp-≈ = λ x → x
+  ; F-resp-≈ = λ F → F
   }
 
-pSlice : Functor XMoore (Slice O)
+pSlice : Functor FMoore (Slice O)
 pSlice = record
-  { F₀ = λ { A → let module A = XMooreObj A in sliceobj A.s}
-  ; F₁ = λ { F → let module F = XMoore⇒ F in slicearr {h = F.hom} (Equiv.sym F.comm-s) }
+  { F₀ = λ { A → let module A = FMooreObj A in sliceobj A.s}
+  ; F₁ = λ { F → let module F = FMoore⇒ F in slicearr {h = F.hom} (Equiv.sym F.comm-s) }
   ; identity = refl
   ; homomorphism = refl
-  ; F-resp-≈ = λ x → x
+  ; F-resp-≈ = λ F → F
   }
   -}
 
 open F-Algebra
 
--- L : Functor (F ↘ O) XMoore
+-- L : Functor (F ↘ O) FMoore
 -- L = record
 --   { F₀ = λ { record { α = Z ; β = β ; f = f } →
---       xobj (A (free.X₀ Z)) (α {F = F} (free.X₀ Z)) {!   !}}
+--       Fobj (A (free.F₀ Z)) (α {F = F} (free.F₀ Z)) {!   !}}
 --   ; F₁ = {!   !}
 --   ; identity = {!   !}
 --   ; homomorphism = {!   !}
@@ -90,25 +90,25 @@ open F-Algebra
 
 module _
    {R : Functor C C}
-   (adj : X ⊣ R)
+   (adj : F ⊣ R)
    {complete : ∀ {o ℓ e} → Complete o ℓ e C} where
 
   module adj = Adjoint adj
-  open XMoore-Complete adj {complete = complete}
+  open FMoore-Complete adj {complete = complete}
 
   open MR C
 
-  o∞ : F-Algebra X
+  o∞ : F-Algebra F
   o∞ = record
-    { A = R∞.X
+    { A = R∞.F
     ; α = d∞
     }
 
-  B : Functor XMoore (Slice (F-Algebras X) o∞)
+  B : Functor FMoore (Slice (F-Algebras F) o∞)
   B = record
-    { F₀ = λ { A → sliceobj (record { f = behaviour A ; commutes = XMoore⇒.comm-d ⊤.! }) }
+    { F₀ = λ { A → sliceobj (record { f = behaviour A ; commutes = FMoore⇒.comm-d ⊤.! }) }
     ; F₁ = λ { F →
-      let module F = XMoore⇒ F in
+      let module F = FMoore⇒ F in
       slicearr {h = record { f = F.hom ; commutes = F.comm-d }}
                (Equiv.sym (commute-behaviour F)) }
     ; identity = Equiv.refl
@@ -116,7 +116,7 @@ module _
     ; F-resp-≈ = Fun.id
     }
 
-  L : Functor (Slice (F-Algebras X) o∞) XMoore
+  L : Functor (Slice (F-Algebras F) o∞) FMoore
   L = record
     { F₀ = λ { (sliceobj {record { A = A; α = α }} (record { f = f; commutes = commutes })) →
       record
@@ -132,14 +132,14 @@ module _
         }
     ; identity = refl
     ; homomorphism = refl
-    ; F-resp-≈ = λ x → x
+    ; F-resp-≈ = λ F → F
     }
 
   L⊣B : L ⊣ B
   L⊣B = record
     { unit = ntHelper record
       { η = λ obj@(sliceobj {record { A = A; α = α }} arr@(record { f = f; commutes = commutes })) →
-          slicearr {h = Category.id (F-Algebras X)}
+          slicearr {h = Category.id (F-Algebras F)}
            (begin behaviour (record { E = A ; d = α ; s = R∞.π 0 ∘ f }) ∘ id ≈⟨ identityʳ ⟩
                   behaviour (record { E = A ; d = α ; s = R∞.π 0 ∘ f })
                     ≈⟨ ⊤.!-unique (record
@@ -152,11 +152,11 @@ module _
       }
     ; counit = ntHelper record
        { η = λ A →
-         let module A = XMooreObj A in
+         let module A = FMooreObj A in
          record
            { hom = id
-           ; comm-d = id-comm-sym ○ refl⟩∘⟨ Equiv.sym X.identity
-           ; comm-s = ⟺ (XMoore⇒.comm-s ⊤.!) ○ Equiv.sym identityʳ
+           ; comm-d = id-comm-sym ○ refl⟩∘⟨ Equiv.sym F.identity
+           ; comm-s = ⟺ (FMoore⇒.comm-s ⊤.!) ○ Equiv.sym identityʳ
            }
        ; commute = λ _ → id-comm-sym
        }
@@ -166,19 +166,19 @@ module _
 
   module _ where
 
-    forget : Functor (F-Algebras X) C
+    forget : Functor (F-Algebras F) C
     forget = record
       { F₀ = F-Algebra.A
       ; F₁ = F-Algebra-Morphism.f
       ; identity = refl
       ; homomorphism = refl
-      ; F-resp-≈ = λ x → x
+      ; F-resp-≈ = λ F → F
       }
 
     module forget = Functor forget
 
-    -- Requirement that X is an input process
-    module _ (free : Functor C (F-Algebras X))
+    -- Requirement that F is an input process
+    module _ (free : Functor C (F-Algebras F))
              (Free⊣Forget : free ⊣ forget) where
 
       module free = Functor free
@@ -186,10 +186,10 @@ module _
 
       open import Categories.Adjoint.Slice free forget Free⊣Forget o∞
 
-      F~″ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras X) o∞)
+      F~″ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞)
       F~″ = G~
 
-      F~′ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras X) o∞)
+      F~′ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞)
       F~′ = record
         { F₀ =
           λ { (sliceobj {Y} f) →
@@ -199,7 +199,7 @@ module _
                 ; d = α (free.₀ Y)
                 ; s = R∞.π 0 ∘ F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞) ∘ F-Algebra-Morphism.f (free.₁ f)
                 })
-              ; commutes = XMoore⇒.comm-d ⊤.!
+              ; commutes = FMoore⇒.comm-d ⊤.!
               }) }
         ; F₁ = λ { arr@(slicearr {h = h} c) →
             slicearr {h = free.₁ h}
@@ -222,7 +222,7 @@ module _
         ; F-resp-≈ = free.F-resp-≈
         }
 
-      U~′ : Functor (Slice (F-Algebras X) o∞) (Slice C (forget.₀ o∞))
+      U~′ : Functor (Slice (F-Algebras F) o∞) (Slice C (forget.₀ o∞))
       U~′ = record
         { F₀ =
           λ (sliceobj {Y} (record { f = f ; commutes = commutes })) →
@@ -235,18 +235,18 @@ module _
               })))
         ; identity = refl
         ; homomorphism = refl
-        ; F-resp-≈ = λ x → x
+        ; F-resp-≈ = λ F → F
         }
 
       open import Categories.Category.Instance.Cats using (Cats)
 
       module _ where
-        module Cats = Category (Cats {!   !} {!   !} {!   !}) -- (Functors (Slice C (forget.₀ o∞)) (Slice (F-Algebras X) o∞))
+        module Cats = Category (Cats {!   !} {!   !} {!   !}) -- (Functors (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞))
 
         t : F~″ Cats.≈ F~′
-        t = record { F⇒G = record { η = λ X → slicearr {h = {! free.F₁ (SliceObj.arr X)  !}} {!   !} ; commute = {!   !} ; sym-commute = {!   !} }
-                   ; F⇐G = record { η = λ X → slicearr {h = {! free.F₁ (SliceObj.arr X)  !}} {!   !} ; commute = {! λ x → refl  !} ; sym-commute = {!   !} }
-                   ; iso = λ X₂ → {!   !} }
+        t = record { F⇒G = record { η = λ F → slicearr {h = {! free.F₁ (SliceObj.arr F)  !}} {!   !} ; commute = {!   !} ; sym-commute = {!   !} }
+                   ; F⇐G = record { η = λ F → slicearr {h = {! free.F₁ (SliceObj.arr F)  !}} {!   !} ; commute = {! λ F → refl  !} ; sym-commute = {!   !} }
+                   ; iso = λ F₂ → {!   !} }
 
 
 {-
@@ -271,8 +271,8 @@ module _
                           --  ; comm-d =
                           --     begin (behaviour _ ∘ Free⊣Forget.unit.η Y) ∘ {!   !} ≈⟨ assoc ⟩
                           --           behaviour _ ∘ Free⊣Forget.unit.η Y ∘ {!   !} ≈⟨ {!  !} ⟩
-                          --           d∞ ∘ X.₁ (behaviour _) ∘  X.₁ (Free⊣Forget.unit.η Y) ≈⟨ refl⟩∘⟨ Equiv.sym X.homomorphism ⟩
-                          --           d∞ ∘ X.₁ (behaviour _ ∘ Free⊣Forget.unit.η Y) ∎
+                          --           d∞ ∘ F.₁ (behaviour _) ∘  F.₁ (Free⊣Forget.unit.η Y) ≈⟨ refl⟩∘⟨ Equiv.sym F.homomorphism ⟩
+                          --           d∞ ∘ F.₁ (behaviour _ ∘ Free⊣Forget.unit.η Y) ∎
                           --  ; comm-s = begin {!   !} ≈⟨ refl⟩∘⟨ {!   !} ⟩ {!   !} ≈⟨ Equiv.sym {! ⊤.!-unique ?  !} ⟩ {!   !} ∎
                           --  })) ⟩
                   behaviour (record { E = Y ; d = _ ; s = R∞.π 0 ∘ arr })
@@ -293,15 +293,15 @@ module _
                           begin  (F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞)
                                  ∘ F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg)))
                                  ∘ α (free.F₀ (A Y)) ≈⟨ assoc ⟩
-                                 {!   !} ≈⟨ {! XMoore⇒.comm-d ⊤.! !} ⟩
+                                 {!   !} ≈⟨ {! FMoore⇒.comm-d ⊤.! !} ⟩
                                  {!   !} ≈⟨ {!  Free⊣Forget.counit.commute !} ⟩
-                                 {!   !} ≈⟨ {! XMoore⇒.comm-d ⊤.!  !} ⟩
-                                 d∞ ∘ X.₁ {!   !}
-                                    ∘ X.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ X.F-resp-≈ (⊤.!-unique
+                                 {!   !} ≈⟨ {! FMoore⇒.comm-d ⊤.!  !} ⟩
+                                 d∞ ∘ F.₁ {!   !}
+                                    ∘ F.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ F.F-resp-≈ (⊤.!-unique
                                       (record { hom = _ ; comm-d = {!   !} ; comm-s = {!   !} })) ⟩∘⟨refl ⟩
-                                 d∞ ∘ X.₁ (F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞))
-                                    ∘ X.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ Equiv.sym X.homomorphism ⟩
-                                 d∞ ∘ X.₁ ((F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞)
+                                 d∞ ∘ F.₁ (F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞))
+                                    ∘ F.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ Equiv.sym F.homomorphism ⟩
+                                 d∞ ∘ F.₁ ((F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞)
                                  ∘ F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg)))) ∎
                        ; comm-s = refl⟩∘⟨ refl⟩∘⟨ free.F-resp-≈ (⊤.!-unique (record { hom = _ ; comm-d = F-Algebra-Morphism.commutes alg ; comm-s = refl })) })) ⟩
                   behaviour (record { E = A (F₀ (free ∘F forget) Y)
@@ -314,7 +314,7 @@ module _
         }
         -}
 {-
-  L : Functor (Slice (forget.₀ o∞)) XMoore
+  L : Functor (Slice (forget.₀ o∞)) FMoore
   L = record
     { F₀ = λ { (sliceobj {A} arr)  → record
       { E = forget.₀ (free.₀ A)
@@ -341,7 +341,7 @@ module _
   module L = Functor L
   -}
 {-
-  module _ (A : SliceObj R∞.X) where
+  module _ (A : SliceObj R∞.F) where
     private module A = SliceObj A
 
     mister : behaviour (L.₀ A) ≈ F-Algebra-Morphism.f (Adjoint.Radjunct Free⊣Forget A.arr)
