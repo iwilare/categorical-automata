@@ -16,7 +16,7 @@ open import Categories.Adjoint
 open import Data.Nat using (ℕ; suc; zero)
 open import Relation.Binary.PropositionalEquality
 
-module FMoore {o l e} {C : Category o l e} {F : Functor C C} (O : Category.Obj C) where
+module FMoore {o l e} {C : Category o l e} (F : Functor C C) (O : Category.Obj C) where
 
 open Category C
 open HomReasoning

@@ -30,7 +30,9 @@ import Categories.Morphism.Reasoning as MR
 private
   variable
     o o′ o″ ℓ ℓ′ ℓ″ e e′ e″ : Level
-    C D E : Category o ℓ e
+    C : Category o ℓ e
+    D : Category o′ ℓ′ e′
+    E : Category o″ ℓ″ e″
 
 -- Adjoints compose; we can't be sloppy, so associators and unitors must be inserted.
 -- Use single letters in pairs, so L & M on the left, and R & S on the right

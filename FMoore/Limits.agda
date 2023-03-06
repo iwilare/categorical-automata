@@ -17,10 +17,10 @@ open import Data.Nat using (ℕ; suc; zero)
 open import Relation.Binary.PropositionalEquality
 
 -- if F is left adjoint, and C has pullbacks, then FMach has products (and then equalizers)
-module FMoore.Limits {o l e} {C : Category o l e} {F : Functor C C} (O : Category.Obj C)
-                     {R : Functor C C} (adj : F ⊣ R) {complete : ∀ {o ℓ e} → Complete o ℓ e C}where
+module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Category.Obj C)
+                     {R : Functor C C} (adj : F ⊣ R) (complete : ∀ {o ℓ e} → Complete o ℓ e C) where
 
-  open import FMoore O
+  open import FMoore F O
 
   open Category C
   open HomReasoning

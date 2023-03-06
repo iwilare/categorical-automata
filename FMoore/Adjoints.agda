@@ -3,7 +3,7 @@ open import Data.Unit
 open import Data.Product
 open import Data.Nat
 open import Categories.Object.Terminal
-open import Categories.Object.Product.IndeFed
+open import Categories.Object.Product.Indexed
 open import Categories.Object.Product
 open import Categories.NaturalTransformation using (ntHelper)
 open import Categories.Functor.Slice
@@ -27,66 +27,13 @@ import Categories.Category.Complete
 module FMoore.Adjoints {o l e} {C : Category o l e} {F : Functor C C} (O : Category.Obj C) where
 
 open import Categories.Adjoint
-open import FMoore {o} {l} {e} {C} {F} O
+open import FMoore F O
 open Category C
 open HomReasoning
 open Equiv
 pattern * = lift Data.Unit.tt
 
-{-
--- output functor
-Bout : Functor FMoore (F ↘ O)
-Bout = record
-  { F₀ = λ { A → let module A = FMooreObj A in record { f = A.s ∘ A.d } }
-  ; F₁ = λ { F → let module F = FMoore⇒ F in record
-    { g = F.hom
-    ; h = *
-    ; commute = begin _ ≈⟨ identityˡ ○ F.comm-s ⟩∘⟨refl ⟩
-                      _ ≈⟨ MR.pullʳ C F.comm-d ○ sym-assoc ⟩
-                      _ ∎
-    }}
-  ; identity = refl , *
-  ; homomorphism = refl , *
-  ; F-resp-≈ = λ F → F , *
-  }
-
--- in order to find a left adjoint to Bout we first have to define
--- an adjunction between Alg(F) and C: FMre has functors
--- Alg(F) <-pAlg- FMre -pSlice-> F/O
-pAlg : Functor FMoore (F-Algebras F)
-pAlg = record
-  { F₀ = λ { A → let module A = FMooreObj A in record { A = A.E ; α = A.d }}
-  ; F₁ = λ { F → let module F = FMoore⇒ F in record { f = F.hom ; commutes = F.comm-d }}
-  ; identity = refl
-  ; homomorphism = refl
-  ; F-resp-≈ = λ F → F
-  }
-
-pSlice : Functor FMoore (Slice O)
-pSlice = record
-  { F₀ = λ { A → let module A = FMooreObj A in sliceobj A.s}
-  ; F₁ = λ { F → let module F = FMoore⇒ F in slicearr {h = F.hom} (Equiv.sym F.comm-s) }
-  ; identity = refl
-  ; homomorphism = refl
-  ; F-resp-≈ = λ F → F
-  }
-  -}
-
 open F-Algebra
-
--- L : Functor (F ↘ O) FMoore
--- L = record
---   { F₀ = λ { record { α = Z ; β = β ; f = f } →
---       Fobj (A (free.F₀ Z)) (α {F = F} (free.F₀ Z)) {!   !}}
---   ; F₁ = {!   !}
---   ; identity = {!   !}
---   ; homomorphism = {!   !}
---   ; F-resp-≈ = {!   !}
---   }
-
--- L⊣B : L ⊣ Bout
--- L⊣B = {!   !}
-
 
 module _
    {R : Functor C C}
@@ -94,23 +41,24 @@ module _
    {complete : ∀ {o ℓ e} → Complete o ℓ e C} where
 
   module adj = Adjoint adj
-  open FMoore-Complete adj {complete = complete}
+
+  open import FMoore.Limits F O adj complete
 
   open MR C
 
   o∞ : F-Algebra F
   o∞ = record
-    { A = R∞.F
+    { A = R∞.X
     ; α = d∞
     }
 
   B : Functor FMoore (Slice (F-Algebras F) o∞)
   B = record
     { F₀ = λ { A → sliceobj (record { f = behaviour A ; commutes = FMoore⇒.comm-d ⊤.! }) }
-    ; F₁ = λ { F →
-      let module F = FMoore⇒ F in
-      slicearr {h = record { f = F.hom ; commutes = F.comm-d }}
-               (Equiv.sym (commute-behaviour F)) }
+    ; F₁ = λ { M →
+      let module M = FMoore⇒ M in
+      slicearr {h = record { f = M.hom ; commutes = M.comm-d }}
+               (Equiv.sym (commute-behaviour M)) }
     ; identity = Equiv.refl
     ; homomorphism = Equiv.refl
     ; F-resp-≈ = Fun.id
@@ -189,6 +137,9 @@ module _
       F~″ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞)
       F~″ = G~
 
+      U~″ : Functor (Slice (F-Algebras F) o∞) (Slice C (forget.₀ o∞))
+      U~″ = U~
+
       F~′ : Functor (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞)
       F~′ = record
         { F₀ =
@@ -238,155 +189,7 @@ module _
         ; F-resp-≈ = λ F → F
         }
 
-      open import Categories.Category.Instance.Cats using (Cats)
+      open import Categories.Adjoint.Compose
 
-      module _ where
-        module Cats = Category (Cats {!   !} {!   !} {!   !}) -- (Functors (Slice C (forget.₀ o∞)) (Slice (F-Algebras F) o∞))
-
-        t : F~″ Cats.≈ F~′
-        t = record { F⇒G = record { η = λ F → slicearr {h = {! free.F₁ (SliceObj.arr F)  !}} {!   !} ; commute = {!   !} ; sym-commute = {!   !} }
-                   ; F⇐G = record { η = λ F → slicearr {h = {! free.F₁ (SliceObj.arr F)  !}} {!   !} ; commute = {! λ F → refl  !} ; sym-commute = {!   !} }
-                   ; iso = λ F₂ → {!   !} }
-
-
-{-
-
-      F~⊣U~ : F~ ⊣ U~
-      F~⊣U~ = record
-        { unit = ntHelper record
-          { η = λ { (sliceobj {Y} arr) →
-              slicearr {h = Free⊣Forget.unit.η Y}
-                (begin
-                  behaviour (record { E = A (free.F₀ Y)
-                                    ; d = α (free.F₀ Y)
-                                    ; s = R∞.π 0
-                                        ∘ F-Algebra-Morphism.f (SliceObj.arr (₀ F~ (sliceobj arr))) --(SliceObj.arr (₀ F~ (sliceobj arr)))
-                                    })
-                    ∘ Free⊣Forget.unit.η Y
-                    ≈⟨ Equiv.sym (commute-behaviour (record
-                      { hom = _
-                      ; comm-d = Free⊣Forget.unit.commute _ ○ {!  F-Algebra-Morphism.commutes (free.₁ ?)  !} ○ {!   !} ○ {!   !} --F-Algebra-Morphism.commutes (free.₁ arr)  !} --Free⊣Forget.unit.commute _ ○ {!   !}
-                      ; comm-s = {!   !} })) ⟩  --Equiv.sym (⊤.!-unique {A = record { E = Y ; d = {! α (free.₀ Y)  !} ; s = R∞.π 0 ∘ arr }} (record
-                          --  { hom = _
-                          --  ; comm-d =
-                          --     begin (behaviour _ ∘ Free⊣Forget.unit.η Y) ∘ {!   !} ≈⟨ assoc ⟩
-                          --           behaviour _ ∘ Free⊣Forget.unit.η Y ∘ {!   !} ≈⟨ {!  !} ⟩
-                          --           d∞ ∘ F.₁ (behaviour _) ∘  F.₁ (Free⊣Forget.unit.η Y) ≈⟨ refl⟩∘⟨ Equiv.sym F.homomorphism ⟩
-                          --           d∞ ∘ F.₁ (behaviour _ ∘ Free⊣Forget.unit.η Y) ∎
-                          --  ; comm-s = begin {!   !} ≈⟨ refl⟩∘⟨ {!   !} ⟩ {!   !} ≈⟨ Equiv.sym {! ⊤.!-unique ?  !} ⟩ {!   !} ∎
-                          --  })) ⟩
-                  behaviour (record { E = Y ; d = _ ; s = R∞.π 0 ∘ arr })
-                     ≈⟨ ⊤.!-unique (record { hom = arr ; comm-d = {! F-Algebra-Morphism.commutes (free.₁ arr)  !} ; comm-s = refl }) ⟩
-                  arr ∎) }
-          ; commute = λ (slicearr {h = h} c) → Free⊣Forget.unit.commute h
-          }
-        ; counit = ntHelper record
-          { η = λ { (sliceobj {Y} alg) →
-              slicearr {h = Free⊣Forget.counit.η Y}
-                (begin
-                  F-Algebra-Morphism.f alg ∘ F-Algebra-Morphism.f (Free⊣Forget.counit.η Y)
-                    ≈⟨ Equiv.sym (Free⊣Forget.counit.commute alg) ⟩
-                  F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞) ∘ F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))
-                    ≈⟨ Equiv.sym (⊤.!-unique (record
-                       { hom = _
-                       ; comm-d =
-                          begin  (F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞)
-                                 ∘ F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg)))
-                                 ∘ α (free.F₀ (A Y)) ≈⟨ assoc ⟩
-                                 {!   !} ≈⟨ {! FMoore⇒.comm-d ⊤.! !} ⟩
-                                 {!   !} ≈⟨ {!  Free⊣Forget.counit.commute !} ⟩
-                                 {!   !} ≈⟨ {! FMoore⇒.comm-d ⊤.!  !} ⟩
-                                 d∞ ∘ F.₁ {!   !}
-                                    ∘ F.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ F.F-resp-≈ (⊤.!-unique
-                                      (record { hom = _ ; comm-d = {!   !} ; comm-s = {!   !} })) ⟩∘⟨refl ⟩
-                                 d∞ ∘ F.₁ (F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞))
-                                    ∘ F.₁ (F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg))) ≈⟨ refl⟩∘⟨ Equiv.sym F.homomorphism ⟩
-                                 d∞ ∘ F.₁ ((F-Algebra-Morphism.f (Free⊣Forget.counit.η o∞)
-                                 ∘ F-Algebra-Morphism.f (free.F₁ (F-Algebra-Morphism.f alg)))) ∎
-                       ; comm-s = refl⟩∘⟨ refl⟩∘⟨ free.F-resp-≈ (⊤.!-unique (record { hom = _ ; comm-d = F-Algebra-Morphism.commutes alg ; comm-s = refl })) })) ⟩
-                  behaviour (record { E = A (F₀ (free ∘F forget) Y)
-                                    ; d = α (F₀ (free ∘F forget) Y)
-                                    ; s = _ }) ∎) }
-          ; commute = λ (slicearr {h = h} c) → Free⊣Forget.counit.commute h
-          }
-        ; zig = Free⊣Forget.zig
-        ; zag = Free⊣Forget.zag
-        }
-        -}
-{-
-  L : Functor (Slice (forget.₀ o∞)) FMoore
-  L = record
-    { F₀ = λ { (sliceobj {A} arr)  → record
-      { E = forget.₀ (free.₀ A)
-      ; d = F-Algebra.α (free.₀ A)
-      ; s = R∞.π 0 ∘ F-Algebra-Morphism.f (Free⊣Forget.Radjunct {A = A} {B = o∞} arr)
-      } }
-    ; F₁ = λ { Test@(slicearr {arr} △) → record
-      { hom = F-Algebra-Morphism.f (free.₁ arr)
-      ; comm-d = F-Algebra-Morphism.commutes (free.₁ arr)
-      ; comm-s =
-      begin
-        R∞.π 0 ∘ F-Algebra-Morphism.f _ --((F-Algebras F) [ {! Category.id (F-Algebras F)  !} ∘ {!   !} ])
-          ≈⟨ refl⟩∘⟨ pushˡ (Equiv.sym identityˡ) ⟩
-        R∞.π 0 ∘ F-Algebra-Morphism.f _ --((F-Algebras F) [ Free⊣Forget.Radjunct {!  F-Algebra.α (free.₀ _) !} ∘ free.₁ arr ])
-          ≈⟨ refl⟩∘⟨ Equiv.sym (Adjoint.Radjunct-square Free⊣Forget _ _ _ (Category.id (F-Algebras F)) (△ ○ Equiv.sym identityˡ)) ⟩
-        R∞.π 0 ∘ F-Algebra-Morphism.f _ ∘ F-Algebra-Morphism.f (free.₁ arr)
-          ≈⟨ sym-assoc ⟩
-        (R∞.π 0 ∘ F-Algebra-Morphism.f _ {-(Adjoint.Radjunct Free⊣Forget ?)-}) ∘ F-Algebra-Morphism.f (free.₁ arr) ∎
-      } }
-    ; identity     = free.identity
-    ; homomorphism = free.homomorphism
-    ; F-resp-≈     = free.F-resp-≈
-    }
-  module L = Functor L
-  -}
-{-
-  module _ (A : SliceObj R∞.F) where
-    private module A = SliceObj A
-
-    mister : behaviour (L.₀ A) ≈ F-Algebra-Morphism.f (Adjoint.Radjunct Free⊣Forget A.arr)
-    mister = begin
-      behaviour (₀ L A)
-        ≈⟨ {!   !} ⟩
-      {!   !}
-        ≈⟨ {!   !} ⟩
-      F-Algebra-Morphism.f (Adjoint.Radjunct Free⊣Forget A.arr)
-        ∎
-
-  -- the following is a proof that slaicia is a left adjoint to B
-  -- (which is a right adjoint to R)
-  -- the proof is a bit long, but it is not too complicated
-  adj-slaicia : L ⊣ slaicia
-  adj-slaicia = record
-    { unit = ntHelper record
-      { η = λ A →
-       let module A = SliceObj A in
-              slicearr {_} {h = Free⊣Forget.unit.η A.Y}
-                ({!   !} ⟩∘⟨refl ○ Free⊣Forget.LRadjunct≈id {f = A.arr})
-              --({!   !} ○ Free⊣Forget.LRadjunct≈id {f = A.arr})
-              --(begin
-              --  {!  d∞ ∘ ? !} ≈⟨ {!   !} ⟩
-              --  {!   !} ∎)
-      ; commute = {!   !}
-      }
-    ; counit = {!   !}
-    ; zig = {!   !}
-    ; zag = {!   !}
-    }
--}
-{-
-
-d∞
-
-
-Categories.Diagram.Cone.Cone⇒.arr
-(IsTerminal.!
- (Terminal.⊤-is-terminal
-  (Categories.Diagram.Limit.Limit.terminal
-   (complete
-    (Categories.Category.Construction.StrictDiscrete.lift-func C
-     (R ^_$ O)
-     ∘F
-     Categories.Category.Lift.unliftF Level.zero Level.zero Level.zero
-     (Categories.Category.Construction.StrictDiscrete.Discrete ℕ))))))
--}
+      targetAdjunction : L ∘F G~ ⊣ U~ ∘F B
+      targetAdjunction = G⊣U~ ∘⊣ L⊣B
