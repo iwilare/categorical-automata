@@ -12,6 +12,7 @@ open import Categories.Category.Instance.Properties.Setoids.Complete
 open import Categories.Category.Instance.Cats
 open import Categories.Category.Complete
 open import Categories.NaturalTransformation using (ntHelper)
+open import Categories.NaturalTransformation.NaturalIsomorphism -- using (ntHelper; NaturalIsomorphism)
 open import Categories.Morphism
 
 import Categories.Category.Construction.Cones as Co
@@ -29,6 +30,8 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
         { Obj = Σ (∀ (j : J.Obj) → Category.Obj (F.₀ j))
                   λ S → ∀ {X Y} (f : J [ X , Y ])
                       → _≅_ (F.F₀ Y) (Functor.₀ (F.₁ f) (S X)) (S Y)
+                      × {!   !}
+                      -- serve una naturalità qui
         ; _⇒_ = λ { (S₁ , _) (S₂ , _)
               → ∀ (j : J.Obj)
               → Category._⇒_ (F.₀ j) (S₁ j) (S₂ j) }
@@ -46,7 +49,7 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
           ; sym   = λ f≈g j → Category.Equiv.sym (F.₀ j) (f≈g j)
           ; trans = λ f≈g g≈h j → Category.Equiv.trans (F.₀ j) (f≈g j) (g≈h j)
           }
-        ; ∘-resp-≈  = λ f≈ g≈ j → Category.∘-resp-≈ (F.₀ j) (f≈ j) (g≈ j)
+        ; ∘-resp-≈  = λ f≈g h≈d j → Category.∘-resp-≈ (F.₀ j) (f≈g j) (h≈d j)
         }
       ; apex = record
         { ψ = λ j → record
@@ -58,16 +61,16 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
             }
         ; commute = λ X⇒Y → record
           { F⇒G = ntHelper record
-            { η = λ { (S , e) → _≅_.from (e X⇒Y) } --_≅_.from (e X⇒Y)
-            ; commute = λ { {X₁ , X₂} {Y₁ , Y₂} f → {!   !} }
+            { η = λ { (S , e) → {!   !} } --_≅_.from (e X⇒Y) } --_≅_.from (e X⇒Y)
+            ; commute = λ { {X₁ , X₂} {Y₁ , Y₂} f → {!    !} }
             }
           ; F⇐G = ntHelper record
-            { η = λ { (S , e) → _≅_.to (e X⇒Y) }
+            { η = λ { (S , e) → {!   !} } -- _≅_.to (e X⇒Y) }
             ; commute = {!   !}
             }
           ; iso = λ { (S , e) → record
-            { isoˡ = _≅_.isoˡ (e X⇒Y)
-            ; isoʳ = _≅_.isoʳ (e X⇒Y)
+            { isoˡ = _≅_.isoˡ (proj₁ (e X⇒Y))
+            ; isoʳ = _≅_.isoʳ (proj₁ (e X⇒Y))
             } }
           }
         }
@@ -77,7 +80,12 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
         let module K = Cone K
         in record
         { arr = record
-          { F₀ = λ x → (λ j → Functor.F₀ (K.ψ j) x) , λ f → {! K.commute f  !}
+          { F₀ = λ x → (λ j → Functor.F₀ (K.ψ j) x)
+               , λ f → record
+                { from = NaturalIsomorphism.⇒.η (K.commute f) x
+                ; to   = NaturalIsomorphism.⇒.η (K.commute f) x
+                ; iso  = {!   !}
+                } , {!   !}
           ; F₁ = {!   !}
           ; identity = {!   !}
           ; homomorphism = {!       !}
