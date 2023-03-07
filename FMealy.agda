@@ -42,7 +42,7 @@ record FMealy⇒ (A B : FMealyObj) : Set (o ⊔ l ⊔ e) where
     comm-d : hom ∘ A.d ≈ B.d ∘ F.F₁ hom
     comm-s : A.s ≈ B.s ∘ F.F₁ hom
 
-open FMealy⇒
+open FMealy⇒ public
 
 _⊚_ : {A B C : FMealyObj} → FMealy⇒ B C → FMealy⇒ A B → FMealy⇒ A C
 _⊚_ {A} {B} {C} g f = record
