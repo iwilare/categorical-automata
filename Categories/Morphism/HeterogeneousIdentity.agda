@@ -108,5 +108,5 @@ hid-switch-sym : ∀ {A B C} (p : A ≡ B) (f : C ⇒ A) (g : C ⇒ B)
               → f ≈ subst (B ⇒_) (sym p) id ∘ g
 hid-switch-sym refl f g f≈g = Equiv.trans (Equiv.sym identityˡ) (Equiv.trans f≈g (Equiv.sym identityˡ))
 
-thm : ∀ {A B C} (P : {!   !})  (p : A ≡ B) (f : {!   !})
-    → subst P (sym (sym p)) f ≡ subst P p F
+-- thm : ∀ {A B C} (P : {!   !})  (p : A ≡ B) (f : {!   !})
+    -- → subst P (sym (sym p)) f ≡ subst P p F
