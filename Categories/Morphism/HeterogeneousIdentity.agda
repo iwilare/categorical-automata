@@ -97,3 +97,16 @@ hid-square {f = f} {p} {q} {g} eq = switch-tofromʳ (hid-≅ p) (begin
   subst₂ _⇒_ p q f              ≈⟨ eq ⟩
   g                             ∎)
   where open HomReasoning
+
+hid-switch : ∀ {A B C} (p : A ≡ B) (f : C ⇒ B) (g : C ⇒ A)
+              → subst (B ⇒_) (sym p) id ∘ f ≈ g
+              → f ≈ hid p ∘ g
+hid-switch refl f g f≈g = Equiv.trans (Equiv.sym identityˡ) (Equiv.trans f≈g (Equiv.sym identityˡ))
+
+hid-switch-sym : ∀ {A B C} (p : A ≡ B) (f : C ⇒ A) (g : C ⇒ B)
+              → hid p ∘ f ≈ g
+              → f ≈ subst (B ⇒_) (sym p) id ∘ g
+hid-switch-sym refl f g f≈g = Equiv.trans (Equiv.sym identityˡ) (Equiv.trans f≈g (Equiv.sym identityˡ))
+
+thm : ∀ {A B C} (P : {!   !})  (p : A ≡ B) (f : {!   !})
+    → subst P (sym (sym p)) f ≡ subst P p F

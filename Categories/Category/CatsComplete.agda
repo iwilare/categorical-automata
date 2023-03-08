@@ -9,13 +9,14 @@ open import Categories.Category using (Category; _[_,_])
 open import Categories.Functor
 open import Categories.Category.Instance.Setoids
 open import Categories.Category.Instance.Properties.Setoids.Complete
-open import Categories.Category.Instance.Cats
+open import Categories.Category.Instance.StrictCats
 open import Categories.Category.Complete
 open import Categories.NaturalTransformation using (ntHelper; NaturalTransformation)
 open NaturalTransformation
 open import Categories.NaturalTransformation.NaturalIsomorphism -- using (ntHelper; NaturalIsomorphism)
 open import Categories.Morphism
 import Categories.Morphism.Reasoning as MR
+open import Relation.Binary.PropositionalEquality using (_≡_)
 
 import Categories.Category.Construction.Cones as Co
 
@@ -23,7 +24,7 @@ open Π using (_⟨$⟩_)
 
 module Categories.Category.CatsComplete where
 
-Cats-Complete : {o ℓ e o' ℓ' e' : Level} → Complete o ℓ e (Cats (o ⊔ ℓ) ((o ⊔ ℓ)) ((o ⊔ ℓ))) -- (suc (o ⊔ ℓ ⊔ e ⊔ ℓ')) (suc (o ⊔ ℓ ⊔ e ⊔ e'))) --(c ⊔ ℓ ⊔ o ⊔ ℓ′) (o ⊔ ℓ′))
+Cats-Complete : {o ℓ e o' ℓ' e' : Level} → Complete o ℓ e (StrictCats (o ⊔ ℓ) ((o ⊔ ℓ)) ((o ⊔ ℓ))) -- (suc (o ⊔ ℓ ⊔ e ⊔ ℓ')) (suc (o ⊔ ℓ ⊔ e ⊔ e'))) --(c ⊔ ℓ ⊔ o ⊔ ℓ′) (o ⊔ ℓ′))
 Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
   record
   { terminal = record
@@ -31,7 +32,7 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
       { N = record
         { Obj = Σ (∀ (j : J.Obj) → Category.Obj (F.₀ j))
                   λ S → ∀ {X Y} (f : J [ X , Y ])
-                      → (_≅_ (F.F₀ Y) (Functor.₀ (F.₁ f) (S X)) (S Y))
+                      → ((F.F₀ Y) ≡ (Functor.₀ (F.₁ f) (S X)) (S Y))
         ; _⇒_ = λ { (S₁ , e₁) (S₂ , e₂)
               → Σ (∀ (j : J.Obj) → Category._⇒_ (F.₀ j) (S₁ j) (S₂ j))
                   (λ A → ∀ {X Y} (X⇒Y : J [ X , Y ])
