@@ -49,10 +49,17 @@ Cats-Pullback-Cat {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
             (λ { (f , g) → F.₁ f E.∘ hid p E.≈ hid p' E.∘ G.₁ g }) }
   ; _≈_ = λ { ((f , f') , e) ((g , g') , e') → f A.≈ g × f' B.≈ g' }
   ; id = λ { {((a , b) , q)} → (A.id , B.id)
-      , {!   !} } -- (F.identity ○ (E.Equiv.sym (hid-symʳ q) ○ (refl⟩∘⟨ introˡ G.identity))) }
-  ; _∘_ = λ { {A , eA} {B , eB} {C , eC} ((f , f') , e) ((g , g') , e')
+      , (elimˡ F.identity ○ introʳ G.identity) }
+  ; _∘_ = λ { {(A1 , B1) , e1} {(A2 , B2) , e2} {(A3 , B3) , e3} ((f , f') , e) ((g , g') , e')
         → ((f A.∘ g) , (f' B.∘ g'))
-         , {!   !} -- (F.homomorphism ○ ((e ⟩∘⟨ e') ○ ((E.assoc ○ (refl⟩∘⟨ E.assoc)) ○ ((refl⟩∘⟨ refl⟩∘⟨ pullˡ (hid-symˡ eB)) ○ (refl⟩∘⟨ refl⟩∘⟨ E.identityˡ ○ (refl⟩∘⟨ pullˡ (E.Equiv.sym G.homomorphism)))))))
+         , (begin {!   !} ≈⟨ (F.homomorphism ⟩∘⟨refl) ⟩
+                  {!   !} ≈⟨ ((refl⟩∘⟨ introʳ (hid-symʳ e1)) ⟩∘⟨refl) ⟩
+                  {!   !} ≈⟨ ((refl⟩∘⟨ pullˡ e') ⟩∘⟨refl) ⟩
+                  {!   !} ≈⟨ (pullˡ (pullˡ e) ⟩∘⟨refl) ⟩
+                  {!   !} ≈⟨ pullʳ (hid-symˡ e1) ⟩
+                  {!   !} ≈⟨ pullʳ E.identityʳ ⟩
+                  {!   !} ≈⟨ pullʳ (E.Equiv.sym G.homomorphism) ⟩
+                  {!   !} ∎)
          }
   ; assoc = A.assoc , B.assoc
   ; sym-assoc = A.sym-assoc , B.sym-assoc
@@ -100,11 +107,17 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E}  F G =
     }
   ; isPullback = record
     { commute = record { eq₀ = λ ((a , b) , e) → sym e
-                       ; eq₁ = λ { ((f , g) , e) → {!   !} } -- (refl⟩∘⟨ e) ○ (pullˡ (hid-symˡ _) ○ E.identityˡ) }
+                       ; eq₁ = λ { {(x , y) , p} {(z , w) , q} ((f , g) , e) →
+                         begin {!   !} ≈⟨ {!    !} ⟩
+                               {!   !} ≈⟨ {!   !} ⟩
+                               {!   !} ≈⟨ {!   !} ⟩
+                               {!   !} ≈⟨ {!   !} ⟩
+                               {!   !} ≈⟨ {!   !} ⟩
+                               {!   !} ∎ } -- (refl⟩∘⟨ e) ○ (pullˡ (hid-symˡ _) ○ E.identityˡ) }
                        }
     ; universal = λ { {h₁ = h₁} {h₂} (record { eq₀ = eq₀ ; eq₁ = eq₁ }) → record
       { F₀ = λ X → (Functor.₀ h₁ X , Functor.₀ h₂ X) , sym (eq₀ X)
-      ; F₁ = λ {A} {B} f → (Functor.₁ h₁ f , Functor.₁ h₂ f) , {! eq₁ f  !}
+      ; F₁ = λ {A} {B} f → (Functor.₁ h₁ f , Functor.₁ h₂ f) , {!   !}
       ; identity = Functor.identity h₁ , Functor.identity h₂
       ; homomorphism = Functor.homomorphism h₁ , Functor.homomorphism h₂
       ; F-resp-≈ = λ eq → Functor.F-resp-≈ h₁ eq , Functor.F-resp-≈ h₂ eq
