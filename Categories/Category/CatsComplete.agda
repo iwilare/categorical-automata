@@ -27,8 +27,8 @@ Cats-Complete : {o ℓ e o' ℓ' e' : Level} → Complete o ℓ e (Cats (o ⊔ �
 Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
   record
   { terminal = record
-    { ⊤        = record
-      { N     = record
+    { ⊤ = record
+      { N = record
         { Obj = Σ (∀ (j : J.Obj) → Category.Obj (F.₀ j))
                   λ S → ∀ {X Y} (f : J [ X , Y ])
                       → (_≅_ (F.F₀ Y) (Functor.₀ (F.₁ f) (S X)) (S Y))
@@ -133,10 +133,11 @@ Cats-Complete {o} {ℓ} {e} {o'} {ℓ'} {e'} {J = J} F =
             let module f = Cone⇒ f in record
             { F⇒G = ntHelper (record
               { η = λ X → (λ j → NaturalIsomorphism.⇐.η (Cone⇒.commute f) X)
-                       , (λ {X} {Y} X⇒Y →
-                            let open Category (F.F₀ Y)
-                                open HomReasoning in (begin {!   !} ≈⟨ {! NaturalIsomorphism.⇐.commute (f.commute ?) f  !} ⟩ {!   !} ∎)
-                                                   , (begin {!   !} ≈⟨ {!   !} ⟩ {!   !} ∎)  )
+                         , (λ {X} {Y} X⇒Y →
+                             let open Category (F.F₀ Y)
+                                 open HomReasoning in ( {! Equiv.sym (NaturalIsomorphism.⇐.commute f.commute ?) !}
+                                                      ○ {!   Equiv.sym (NaturalIsomorphism.iso.isoʳ f.commute ?) !}) -- NaturalIsomorphism.⇐.commute (f.commute ?)
+                                                    , ({!   !} ○ {!   !})  )
               ; commute = λ g j → NaturalIsomorphism.⇐.commute (Cone⇒.commute f) g
               })
             ; F⇐G = {!   !}
