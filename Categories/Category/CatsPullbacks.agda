@@ -116,13 +116,21 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E}  F G =
                        }
     ; universal = λ { {h₁ = h₁} {h₂} (record { eq₀ = eq₀ ; eq₁ = eq₁ }) → record
       { F₀ = λ X → (Functor.₀ h₁ X , Functor.₀ h₂ X) , sym (eq₀ X)
-      ; F₁ = λ {A} {B} f → (Functor.₁ h₁ f , Functor.₁ h₂ f) , {!   !}
+      ; F₁ = λ {A} {B} f → (Functor.₁ h₁ f , Functor.₁ h₂ f) , 
+                           (begin {!   !} ≈⟨ introˡ (hid-symˡ (eq₀ B)) ⟩ 
+                                  {!   !} ≈⟨ center (eq₁ f) ⟩ 
+                                  {!   !} ≈⟨ (refl⟩∘⟨ pullʳ (hid-symʳ (eq₀ A))) ⟩ 
+                                  {!   !} ≈⟨ (refl⟩∘⟨ E.identityʳ) ⟩ 
+                                  {!   !} ∎)
       ; identity = Functor.identity h₁ , Functor.identity h₂
       ; homomorphism = Functor.homomorphism h₁ , Functor.homomorphism h₂
       ; F-resp-≈ = λ eq → Functor.F-resp-≈ h₁ eq , Functor.F-resp-≈ h₂ eq
       } }
-    ; unique = {!   !}
-    ; p₁∘universal≈h₁ = {!   !}
+    ; unique = λ { {eq = eq} p₁i≡h₁ p₂i≡h₂ → 
+      record { eq₀ = λ X → {!  !} 
+             ; eq₁ = {!   !} }}
+    ; p₁∘universal≈h₁ = record { eq₀ = {!   !} ; eq₁ = {!   !} }
     ; p₂∘universal≈h₂ = {!   !}
     }
   }
+ 
