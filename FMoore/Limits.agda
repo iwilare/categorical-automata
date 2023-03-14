@@ -16,9 +16,11 @@ open import Categories.Adjoint
 open import Data.Nat using (ℕ; suc; zero)
 open import Relation.Binary.PropositionalEquality
 
+
 -- if F is left adjoint, and C has pullbacks, then FMach has products (and then equalizers)
 module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Category.Obj C)
                      {R : Functor C C} (adj : F ⊣ R) (complete : ∀ {o ℓ e} → Complete o ℓ e C) where
+
 
   open import FMoore F O
 
@@ -26,6 +28,20 @@ module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Categor
   open HomReasoning
   open MR C
   module F = Functor F
+
+  module HelperPullbacks where
+
+    open import Categories.Diagram.Pullback.Limit C
+
+    module _ {A B E} {f : A ⇒ E} {g : B ⇒ E} (P : Pullback C f g) where
+      open Pullback P
+
+      diag : _
+      diag = f ∘ p₁
+
+  open HelperPullbacks
+
+  open import FMoore.CustomPullbackLimits C
 
   open import Categories.Object.Product.Indexed.Properties C
   open import Categories.Diagram.Pullback.Limit C
@@ -128,6 +144,9 @@ module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Categor
 
     module P∞ = Pullback (complete⇒pullback complete (behaviour A) (behaviour B))
 
+    diagonal : _
+    diagonal = behaviour A ∘ P∞.p₁
+
     abstract
       universal-d : behaviour A ∘ A.d ∘ F.F₁ P∞.p₁
                   ≈ behaviour B ∘ B.d ∘ F.F₁ P∞.p₂
@@ -205,7 +224,7 @@ module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Categor
         { A×B = record
           { E = P∞.P
           ; d = P∞.universal {_} {_} {F.F₀ P∞.P} {A.d ∘ F.₁ P∞.p₁} {B.d ∘ F.₁ P∞.p₂} universal-d
-          ; s = R∞.π 0 ∘ P∞.diag
+          ; s = R∞.π 0 ∘ diagonal
           }
         ; π₁ = record
           { hom = P∞.p₁
@@ -246,8 +265,8 @@ module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Categor
                 R∞.π 0 ∘ behaviour C                ≈⟨ refl⟩∘⟨
                 commute-behaviour PA ⟩
                 R∞.π 0 ∘ behaviour A ∘ PA.hom       ≈⟨ refl⟩∘⟨ Equiv.sym (pullʳ P∞.p₁∘universal≈h₁) ⟩
-                R∞.π 0 ∘ P∞.diag ∘ P∞.universal _   ≈⟨ sym-assoc ⟩
-                (R∞.π 0 ∘ P∞.diag) ∘ P∞.universal _ ∎
+                R∞.π 0 ∘ diagonal ∘ P∞.universal _   ≈⟨ sym-assoc ⟩
+                (R∞.π 0 ∘ diagonal) ∘ P∞.universal _ ∎
             }
             ; project₁ = P∞.p₁∘universal≈h₁
             ; project₂ = P∞.p₂∘universal≈h₂
