@@ -26,6 +26,72 @@ open HomReasoning
 open Terminal terminal
 open BinaryProducts products
 
+module Helpers where
+
+  private
+    variable
+      A B D X Y Z : Obj
+      f f′ g g′ h i : A ⇒ B
+
+  open import Categories.Object.Product U
+
+  ⁂-congˡ : f ≈ g → f ⁂ i ≈ g ⁂ i
+  ⁂-congˡ a = [ product ⇒ product ]×-cong₂ a Equiv.refl
+
+  ⁂-congʳ : f ≈ g → i ⁂ f ≈ i ⁂ g
+  ⁂-congʳ = [ product ⇒ product ]×-cong₂ Equiv.refl
+
+  ⁂-id : ∀ {A B} → (id {A = A}) ⁂ (id {A = B}) ≈ id
+  ⁂-id = id×id product
+
+  first∘⁂ : first f ∘ (f′ ⁂ g′) ≈ (f ∘ f′ ⁂ g′)
+  first∘⁂ = Equiv.trans first∘⟨⟩ (⟨⟩-congʳ sym-assoc)
+
+  second∘⁂ : second g ∘ (f′ ⁂ g′) ≈ (f′ ⁂ g ∘ g′)
+  second∘⁂ = Equiv.trans second∘⟨⟩ (⟨⟩-congˡ sym-assoc)
+
+  assocˡ∘second : ∀ {A B} → assocˡ {A = A} {B = B} ∘ (id ⁂ f) ≈ (id ⁂ (id ⁂ f)) ∘ assocˡ
+  assocˡ∘second {f = f} =
+    begin
+      assocˡ ∘ (id ⁂ f)
+    ≈˘⟨ refl⟩∘⟨ ⁂-congˡ ⁂-id ⟩
+      assocˡ ∘ ((id ⁂ id) ⁂ f)
+    ≈⟨ assocˡ∘⁂ ⟩
+      (id ⁂ (id ⁂ f)) ∘ assocˡ
+    ∎
+
+  assocʳ∘first : ∀ {B C} → assocʳ {B = B} {C = C} ∘ (f ⁂ id) ≈ ((f ⁂ id) ⁂ id) ∘ assocʳ
+  assocʳ∘first {f = f} =
+    begin
+      assocʳ ∘ (f ⁂ id)
+    ≈˘⟨ refl⟩∘⟨ ⁂-congʳ ⁂-id ⟩
+      assocʳ ∘ (f ⁂ (id ⁂ id))
+    ≈⟨ assocʳ∘⁂ ⟩
+      ((f ⁂ id) ⁂ id) ∘ assocʳ
+    ∎
+
+  second∘assocʳ : ∀ {A B} → (id ⁂ f) ∘ assocʳ {A = A} {B = B} ≈ assocʳ ∘ (id ⁂ (id ⁂ f))
+  second∘assocʳ {f = f} =
+    begin
+      (id ⁂ f) ∘ assocʳ
+    ≈˘⟨ ⁂-congˡ ⁂-id ⟩∘⟨refl  ⟩
+      ((id ⁂ id) ⁂ f) ∘ assocʳ
+    ≈˘⟨ assocʳ∘⁂ ⟩
+      assocʳ ∘ (id ⁂ (id ⁂ f))
+    ∎
+
+  first∘assocˡ : ∀ {B C} → (f ⁂ id) ∘ assocˡ {B = B} {C = C} ≈ assocˡ ∘ ((f ⁂ id) ⁂ id)
+  first∘assocˡ {f = f} =
+    begin
+      (f ⁂ id) ∘ assocˡ
+    ≈˘⟨ ⁂-congʳ ⁂-id ⟩∘⟨refl ⟩
+      (f ⁂ (id ⁂ id)) ∘ assocˡ
+    ≈˘⟨ assocˡ∘⁂ ⟩
+      assocˡ ∘ ((f ⁂ id) ⁂ id)
+    ∎
+
+open Helpers
+
 module Cartesian-Monoidal = Monoidal (Categories.Category.Cartesian.Monoidal.CartesianMonoidal.monoidal cartesian)
 
 open import Categories.Morphism.Reasoning U

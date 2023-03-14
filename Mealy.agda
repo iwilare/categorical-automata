@@ -37,6 +37,9 @@ record Mealy⇒ {I} {O} (X Y : MealyObj I O) : Set (o ⊔ l ⊔ e) where
 
 open Mealy⇒
 
+first-identity : ∀ {A C} → first {C = C} (id {A = A}) ≈ id
+first-identity = ⟨⟩-cong₂ identityˡ identityˡ ○ η
+
 Mealy : ∀ I O → Category (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e
 Mealy I O = record
   { Obj = MealyObj I O

@@ -37,6 +37,9 @@ record Moore⇒ {I} {O} (X Y : MooreObj I O) : Set (o ⊔ l ⊔ e) where
 
 open Moore⇒
 
+first-identity : ∀ {A C} → first {C = C} (id {A = A}) ≈ id
+first-identity = ⟨⟩-cong₂ identityˡ identityˡ ○ η
+
 Moore : ∀ I O → Category (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e
 Moore I O = record
   { Obj = MooreObj I O
