@@ -155,8 +155,8 @@ module _
         ; F₁ = λ { arr@(slicearr {h = h} c) →
             slicearr {h = free.₁ h}
               (begin
-                  behaviour (record { E = A (free.₀ (SliceObj.Y (Slice⇒.cod arr)))
-                                     ; d = α (free.₀ (SliceObj.Y (Slice⇒.cod arr)))
+                  behaviour (record { E = A (free.₀ (SliceObj.Y (cod arr)))
+                                     ; d = α (free.₀ (SliceObj.Y (cod arr)))
                                      ; s = _
                                      }) ∘ F-Algebra-Morphism.f (free.₁ h)
                         ≈⟨ Equiv.sym (commute-behaviour (record
@@ -164,8 +164,8 @@ module _
                           ; comm-d = F-Algebra-Morphism.commutes (free.₁ h)
                           ; comm-s = pushʳ (pushʳ (free.F-resp-≈ (Equiv.sym c) ○ free.homomorphism))
                           })) ⟩
-                  behaviour (record { E = A (free.₀ (SliceObj.Y (Slice⇒.dom arr)))
-                                     ; d = α (free.₀ (SliceObj.Y (Slice⇒.dom arr)))
+                  behaviour (record { E = A (free.₀ (SliceObj.Y (dom arr)))
+                                     ; d = α (free.₀ (SliceObj.Y (dom arr)))
                                      ; s = _
                                      }) ∎) }
         ; identity = free.identity
