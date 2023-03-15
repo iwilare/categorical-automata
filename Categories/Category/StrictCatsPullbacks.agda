@@ -11,8 +11,7 @@ open import Categories.Category using (Category; _[_,_])
 open import Categories.Functor
 open import Categories.Category.Instance.Setoids
 open import Categories.Category.Instance.Properties.Setoids.Complete
-open import Categories.Category.Instance.Cats
-open import Categories.Category.Instance.StrictCats renaming (Cats to StrictCats)
+open import Categories.Category.Instance.StrictCats
 open import Categories.Category.Complete
 open import Categories.NaturalTransformation using (ntHelper; NaturalTransformation)
 open NaturalTransformation
@@ -35,10 +34,10 @@ module Categories.Category.StrictCatsPullbacks where
 uip : ∀ {ℓ} {A : Set ℓ} → UIP A
 uip refl refl = refl
 
-Cats-Pullback-Cat : {o ℓ e o' ℓ' e' : Level}
+Cats-Pullback-Cat : {o ℓ e : Level}
        → {A B E : Category o ℓ e} (F : Functor A E) (G : Functor B E)
        → Category o (e ⊔ ℓ) e
-Cats-Pullback-Cat {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
+Cats-Pullback-Cat {o} {ℓ} {e} {A} {B} {E} F G =
  let module A = Category A
      module B = Category B
      module E = Category E
@@ -82,12 +81,12 @@ Cats-Pullback-Cat {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
              , B.∘-resp-≈ f≈g₂ h≈i₂
   }
 
-Cats-Pullback : {o ℓ e o' ℓ' e' : Level}
+Cats-Pullback : {o ℓ e : Level}
        → {A B E : Category o (ℓ ⊔ e) e} (F : Functor A E) (G : Functor B E)
        → Pullback (StrictCats o (ℓ ⊔ e) e) F G --Pullback f g
-Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
+Cats-Pullback {o} {ℓ} {e} {A} {B} {E} F G =
   record
-  { P = Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G
+  { P = Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {A} {B} {E} F G
   ; p₁ = π₁
   ; p₂ = π₂
   ; isPullback = record
@@ -140,7 +139,7 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
       }
     universal : {A = A₁ : Category o (ℓ ⊔ e) e} {h₁ : Functor A₁ A}
       {h₂ : Functor A₁ B} →
-      F ∘F h₁ ≡F G ∘F h₂ → Functor A₁ (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G)
+      F ∘F h₁ ≡F G ∘F h₂ → Functor A₁ (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {A} {B} {E} F G)
     universal {h₁ = h₁} {h₂} (record { eq₀ = eq₀ ; eq₁ = eq₁ }) = record
       { F₀ = λ X → (Functor.₀ h₁ X , Functor.₀ h₂ X) , sym (eq₀ X)
       ; F₁ = λ {A} {B} f → (Functor.₁ h₁ f , Functor.₁ h₂ f) ,
@@ -157,7 +156,7 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
     unique₀ : {Ai : Category o (ℓ ⊔ e) e}
         → {h₁ : Functor Ai A}
         → {h₂ : Functor Ai B}
-        → (i : Functor Ai (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G))
+        → (i : Functor Ai (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {A} {B} {E} F G))
         → (let module i = Functor i)
         → (eq : F ∘F h₁ ≡F G ∘F h₂)
         → (p₂i≡h₂ : π₁ ∘F i ≡F h₁)
@@ -172,7 +171,7 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
     asdf : {Ai : Category o (ℓ ⊔ e) e}
         → {h₁ : Functor Ai A}
         → {h₂ : Functor Ai B}
-        → (i : Functor Ai (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G))
+        → (i : Functor Ai (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {A} {B} {E} F G))
         → (let module i = Functor i)
         → (eq : F ∘F h₁ ≡F G ∘F h₂)
         → (p₂i≡h₂ : π₁ ∘F i ≡F h₁)
@@ -181,12 +180,12 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
         → {X : Category.Obj Ai} {Y : Category.Obj Ai}
             (f : Ai [ X , Y ]) →
             Categories.Category.Definitions.CommutativeSquare
-            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G) (Functor.F₁ i f)
+            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {A} {B} {E} F G) (Functor.F₁ i f)
             (Categories.Morphism.HeterogeneousIdentity.hid
-            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G)
+            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {A} {B} {E} F G)
             (unique₀ i eq p₂i≡h₂ p₁i≡h₁ X))
             (Categories.Morphism.HeterogeneousIdentity.hid
-            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G)
+            (Cats-Pullback-Cat  {o} {ℓ ⊔ e} {e} {A} {B} {E} F G)
             (unique₀ i eq p₂i≡h₂ p₁i≡h₁ Y))
             (Functor.F₁ (universal eq) f)
     asdf {Ai} {h₁} {h₂} i eq p₁i≡h₁ p₂i≡h₂ {X = X} {Y = Y} f with

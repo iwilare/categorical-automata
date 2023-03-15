@@ -1,3 +1,5 @@
 name: categorical-automata
-depend: standard-library-1.7.1, agda-categories
-include: .
+depend: standard-library-1.7.1
+include:
+  .
+  /home/andrea/agda-categories/src/
