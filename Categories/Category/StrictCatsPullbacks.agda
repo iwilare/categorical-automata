@@ -108,9 +108,9 @@ Cats-Pullback {o} {ℓ} {e} {o'} {ℓ'} {e'} {A} {B} {E} F G =
         record { eq₀ = unique₀ i eq p₁i≡h₁ p₂i≡h₂
                 ; eq₁ = asdf i eq p₁i≡h₁ p₂i≡h₂ }  }
     ; p₁∘universal≈h₁ = record
-      { eq₀ = λ X → {!   !} ; eq₁ = {!   !} }
+      { eq₀ = λ X → refl ; eq₁ = λ _ → MR.id-comm-sym A }
     ; p₂∘universal≈h₂ = record
-      { eq₀ = λ X → {!   !} ; eq₁ = {!   !} }
+      { eq₀ = λ X → refl ; eq₁ = λ _ → MR.id-comm-sym B }
     }
   } where
     module A = Category A
