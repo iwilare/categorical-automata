@@ -17,9 +17,9 @@ open import Categories.Category.Monoidal
 
 open import Categories.Category.Cartesian.Bundle
 
-module Mealy.Bicategory {o l e} (C : CartesianCategory o l e) where
-{-
-open import Mealy C
+module Moore.Bicategory {o l e} (C : CartesianCategory o l e) where
+
+open import Moore C
 
 open CartesianCategory C
 open HomReasoning
@@ -101,24 +101,25 @@ import Categories.Object.Product.Core as P
 open import Data.Product as PP using (_,_)
 import Categories.Category.Product as CP
 
-⊚ : ∀ {X Y Z} → Functor (CP.Product (Mealy Y Z) (Mealy X Y)) (Mealy X Z)
+⊚ : ∀ {X Y Z} → Functor (CP.Product (Moore Y Z) (Moore X Y)) (Moore X Z)
 ⊚ = record
   { F₀ = λ { (A , B) →
-    let module A = MealyObj A
-        module B = MealyObj B in
+    let module A = MooreObj A
+        module B = MooreObj B in
       record
         { E = A.E × B.E
-        ; d = ⟨ A.d ∘ second B.s , B.d ∘ π₂ ⟩ ∘ assocˡ
-        ; s = A.s ∘ second B.s ∘ assocˡ
+        ; d = ⟨ A.d ∘ π₁ ∘ first (second B.s) , B.d ∘ π₂ ∘ assocˡ ⟩ --⟨ A.d ∘ second B.s , B.d ∘ π₂ ⟩ ∘ assocˡ
+        ; s = A.s ∘ π₁
         }}
   ; F₁ =
   λ { {A₁ PP., A₂} {B₁ PP., B₂} (f PP., g) →
-    let module A₁ = MealyObj A₁
-        module A₂ = MealyObj A₂
-        module B₁ = MealyObj B₁
-        module B₂ = MealyObj B₂
-        module f = Mealy⇒ f
-        module g = Mealy⇒ g in
+    let module A₁ = MooreObj A₁
+        module A₂ = MooreObj A₂
+        module B₁ = MooreObj B₁
+        module B₂ = MooreObj B₂
+        module f = Moore⇒ f
+        module g = Moore⇒ g in
+      {!   !} {-
       record
         { hom = f.hom ⁂ g.hom
         ; comm-d = begin
@@ -145,20 +146,21 @@ import Categories.Category.Product as CP
           B₁.s ∘ (id ⁂ B₂.s) ∘ assocˡ ∘ ((f.hom ⁂ g.hom) ⁂ id)   ≈⟨ refl⟩∘⟨ sym-assoc ⟩
           B₁.s ∘ ((id ⁂ B₂.s) ∘ assocˡ) ∘ ((f.hom ⁂ g.hom) ⁂ id) ≈⟨ sym-assoc ⟩
           (B₁.s ∘ (id ⁂ B₂.s) ∘ assocˡ) ∘ ((f.hom ⁂ g.hom) ⁂ id) ∎
-        } }
-  ; identity     = ⁂-id
-  ; homomorphism = Equiv.sym ⁂∘⁂
-  ; F-resp-≈     = λ (f₁≈g₁ , f₂≈g₂) → ⁂-cong₂ f₁≈g₁ f₂≈g₂
+        } -} }
+  ; identity     = {!   !} --⁂-id
+  ; homomorphism = {!   !} --Equiv.sym ⁂∘⁂
+  ; F-resp-≈     = {!   !} --λ (f₁≈g₁ , f₂≈g₂) → ⁂-cong₂ f₁≈g₁ f₂≈g₂
   }
 
+{-
 π₂∘assocˡ : ∀ {A B C} → π₂ {A = C} {B = A × B} ∘ assocˡ ≈ π₂ ⁂ id
 π₂∘assocˡ = begin π₂ ∘ assocˡ ≈⟨ project₂ ⟩ ⟨ π₂ ∘ π₁ , π₂ ⟩ ≈˘⟨ ⟨⟩-congˡ identityˡ ⟩ π₂ ⁂ id ∎
 
-MealyBicategory : Bicategory (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e o
-MealyBicategory = record
+MooreBicategory : Bicategory (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e o
+MooreBicategory = record
   { enriched = record
     { Obj = Obj
-    ; hom = Mealy
+    ; hom = Moore
     ; id = const (record
       { E = ⊤
       ; d = !
@@ -169,9 +171,9 @@ MealyBicategory = record
       record
       { F⇒G = ntHelper record
         { η = λ { ((X PP., Y) PP., Z) →
-         let module X = MealyObj X in
-         let module Y = MealyObj Y in
-         let module Z = MealyObj Z in
+         let module X = MooreObj X in
+         let module Y = MooreObj Y in
+         let module Z = MooreObj Z in
          let lemma1 : assocˡ ∘ (id ⁂ Z.s) ∘ assocˡ -- todo: refactor comm-s with this
                      ≈ (id ⁂ (id ⁂ Z.s)) ∘ (id ⁂ assocˡ) ∘ assocˡ ∘ (assocˡ ⁂ id)
              lemma1 = begin
@@ -239,9 +241,9 @@ MealyBicategory = record
         }
       ; F⇐G = ntHelper record
         { η = λ { ((X PP., Y) PP., Z) →
-         let module X = MealyObj X in
-         let module Y = MealyObj Y in
-         let module Z = MealyObj Z in
+         let module X = MooreObj X in
+         let module Y = MooreObj Y in
+         let module Z = MooreObj Z in
          let lemma4 : π₂ ∘ assocˡ ∘ π₂ ∘ assocˡ ≈ ((π₂ ∘ π₂) ⁂ id)
              lemma4 = begin
               π₂ ∘ assocˡ ∘ π₂ ∘ assocˡ ≈⟨ refl⟩∘⟨ refl⟩∘⟨ π₂∘assocˡ ⟩
@@ -320,7 +322,7 @@ MealyBicategory = record
     ; unitˡ = record
       { F⇒G = ntHelper record
         { η = λ (_ PP., X) →
-          let module X = MealyObj X in
+          let module X = MooreObj X in
           let lemma : π₂ ∘ assocˡ ≈ π₂ ⁂ id
               lemma = begin
                 π₂ ∘ assocˡ           ≈⟨ project₂ ⟩
@@ -341,7 +343,7 @@ MealyBicategory = record
         }
       ; F⇐G = ntHelper record
         { η = λ (_ PP., X) →
-          let module X = MealyObj X in record
+          let module X = MooreObj X in record
           { hom = ⟨ ! , id ⟩
           ; comm-d = begin
             ⟨ ! , id ⟩ ∘ X.d ≈⟨ ⟨⟩∘ ⟩
@@ -362,7 +364,7 @@ MealyBicategory = record
             (π₂ ∘ ⟨ id ∘ π₁ , X.s ∘ π₂ ⟩ ∘ assocˡ) ∘ (⟨ ! , id ⟩ ⁂ id)                ∎
           }
         ; commute = λ (_ PP., f) →
-          let module f = Mealy⇒ f in begin
+          let module f = Moore⇒ f in begin
             ⟨ ! , id ⟩ ∘ f.hom         ≈⟨ ⟨⟩∘ ⟩
             ⟨ ! ∘ f.hom , id ∘ f.hom ⟩ ≈⟨ ⟨⟩-cong₂ (Equiv.trans (Equiv.sym (!-unique _)) (Equiv.sym identityˡ)) id-comm-sym ⟩
             ⟨ id ∘ ! , f.hom ∘ id ⟩    ≈˘⟨ ⁂∘⟨⟩ ⟩
@@ -376,7 +378,7 @@ MealyBicategory = record
     ; unitʳ = record
       { F⇒G = ntHelper record
         { η = λ (X PP., _) →
-          let module X = MealyObj X in
+          let module X = MooreObj X in
           let lemma6 : (id ⁂ π₂) ∘ assocˡ ≈ (π₁ ⁂ id)
               lemma6 = begin
                 ⟨ id ∘ π₁ , π₂ ∘ π₂ ⟩ ∘ assocˡ           ≈⟨ ⁂∘⟨⟩ ⟩
@@ -396,7 +398,7 @@ MealyBicategory = record
         }
       ; F⇐G = ntHelper record
         { η = λ (X PP., _) →
-          let module X = MealyObj X in record
+          let module X = MooreObj X in record
           { hom = ⟨ id , ! ⟩
           ; comm-d = begin
             ⟨ id , ! ⟩ ∘ X.d ≈⟨ ⟨⟩∘ ⟩
@@ -418,7 +420,7 @@ MealyBicategory = record
             (X.s ∘  ⟨ id ∘ π₁ , π₂ ∘ π₂ ⟩ ∘ assocˡ) ∘ ⟨ ⟨ id , ! ⟩ ∘ π₁ , id ∘ π₂ ⟩ ∎
           }
         ; commute = λ (f PP., _) →
-          let module f = Mealy⇒ f in begin
+          let module f = Moore⇒ f in begin
             ⟨ id , ! ⟩ ∘ f.hom         ≈⟨ ⟨⟩∘ ⟩
             ⟨ id ∘ f.hom , ! ∘ f.hom ⟩ ≈⟨ ⟨⟩-cong₂ id-comm-sym (Equiv.trans (Equiv.sym (!-unique _)) (Equiv.sym identityˡ)) ⟩
             ⟨ f.hom ∘ id  , id ∘ ! ⟩   ≈˘⟨ ⁂∘⟨⟩ ⟩
@@ -434,7 +436,6 @@ MealyBicategory = record
         }
       }
     }
- ; triangle = Cartesian-Monoidal.triangle
  ; pentagon = Cartesian-Monoidal.pentagon
  }
 -}
