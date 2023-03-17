@@ -2,7 +2,7 @@
 
 open import Level
 open import Categories.Category
-open import Categories.Bicategory
+open import Categories.SemiBicategory
 open import Categories.Functor renaming (id to idF)
 open Categories.Functor.Functor
 open import Categories.Functor.Construction.Constant
@@ -17,7 +17,7 @@ open import Categories.Category.Monoidal
 
 open import Categories.Category.Cartesian.Bundle
 
-module Moore.Bicategory {o l e} (C : CartesianCategory o l e) where
+module Moore.SemiBicategory {o l e} (C : CartesianCategory o l e) where
 
 open import Moore C
 
@@ -152,12 +152,26 @@ import Categories.Category.Product as CP
   ; F-resp-≈     = {!   !} --λ (f₁≈g₁ , f₂≈g₂) → ⁂-cong₂ f₁≈g₁ f₂≈g₂
   }
 
-{-
 π₂∘assocˡ : ∀ {A B C} → π₂ {A = C} {B = A × B} ∘ assocˡ ≈ π₂ ⁂ id
 π₂∘assocˡ = begin π₂ ∘ assocˡ ≈⟨ project₂ ⟩ ⟨ π₂ ∘ π₁ , π₂ ⟩ ≈˘⟨ ⟨⟩-congˡ identityˡ ⟩ π₂ ⁂ id ∎
 
-MooreBicategory : Bicategory (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e o
-MooreBicategory = record
+MooreSemiBicategory : SemiBicategory (o ⊔ l ⊔ e) (o ⊔ l ⊔ e) e o
+MooreSemiBicategory = record
+  { enriched = record
+    { Obj = Obj
+    ; hom = Moore
+    ; ⊚ = ⊚
+    ; ⊚-assoc = record
+      { F⇒G = record
+        { η = {!   !}
+        ; commute = {!   !}
+        ; sym-commute = {!   !} }
+      ; F⇐G = {!   !}
+      ; iso = {!   !}
+      }
+    }
+  ; pentagon = {!   !} --
+  } {-record
   { enriched = record
     { Obj = Obj
     ; hom = Moore
