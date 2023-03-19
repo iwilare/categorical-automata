@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Level
 open import Categories.Category
 open import Categories.SemiBicategory
