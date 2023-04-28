@@ -6,6 +6,7 @@ open import Data.List.NonEmpty using (List⁺; _∷⁺_; toList; [_])
 open import Data.List using (List; [];  _∷_)
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
+open import Data.Vec using (Vec; head; _∷ʳ_; _∷_)
 
 open import Set.Automata
 
@@ -99,10 +100,9 @@ Queueₙ : ℕ → Moore A A
 Queueₙ {A} n = record
   -- Successor because we must have at least one element
   -- to be able to define output
-  { E = Fin (ℕ.suc n) → A
+  { E = Vec A (ℕ.suc n)
   -- Pop the head, push at the bottom, shift the rest
-  ; d = λ { (i , v) Fin.zero → i
-          ; (i , v) (Fin.suc n) → v (Fin.suc n) }
+  ; d = λ { (i , _ ∷ v) → v ∷ʳ i }
   -- Output the head of the queue
-  ; s = λ x → x (Data.Fin.fromℕ n)
+  ; s = head
   }

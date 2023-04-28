@@ -1,15 +1,18 @@
 
 module Set.Adjoints where
 
-open import Data.Product using (_,_; _×_; proj₁; proj₂)
+open import Data.Product using (_,_; _×_; proj₁; proj₂; curry)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong₂; cong; trans; sym)
 open import Data.List.NonEmpty using (List⁺; _∷_; _∷⁺_; toList; [_])
 open import Data.List using (List; []; _∷_)
-open import Function using (id; _∘_)
+open import Function using (id; _∘_; flip)
+open import Data.Nat using (ℕ)
+open import Data.Fin using (Fin; zero; suc)
+open import Data.Vec using (Vec; head; _∷ʳ_; _∷_; foldl; replicate)
 
 open import Set.Automata
 open import Set.LimitAutomata
-open import Set.Acephalous
+open import Set.Soft
 open import Set.Utils
 open import Set.Equality
 open import Set.Extension
@@ -26,30 +29,92 @@ module Functors where
   mealify M = record
     { E = M.E
     ; d = M.d
-    ; s = λ x → M.s (M.d x)
+    ; s = λ { (_ , s) → M.s s }
     } where module M = Moore M
 
-  moorify : Mealy A B → Moore A B
-  moorify M = Queue ⋉ M
+  mealify-advance : Moore A B → Mealy A B
+  mealify-advance M = record
+    { E = M.E
+    ; d = M.d
+    ; s = λ { (i , s) → M.s (M.d (i , s)) }
+    } where module M = Moore M
 
-  𝕂 : Mealy A B → AMoore A B
-  𝕂 M = record
-    { M = P∞ _ ⋉ M
-    ; isAcephalous = refl
-    }
-
-  𝕁² : Moore A B → Mealy A B
-  𝕁² {A} {B} M = let module M = Moore M in record
+  mealify-advance₂ : Moore A B → Mealy A B
+  mealify-advance₂ {A} {B} M = let module M = Moore M in record
     { E = A × M.E
     ; d = λ {(a , a' , e) → a , M.d (a' , e)}
     ; s = λ {(a , a' , e) → M.s (M.d (a , M.d (a' , e)))}
     }
 
+  mealify-advanceₙ : ℕ → Moore A B → Mealy A B
+  mealify-advanceₙ {A} {B} n M = record
+    { E = Vec B n × M.E
+    ; d = λ { (a , f) → {!   !} }
+    ; s = λ { (a , g) → M.s {!   !} }
+    } where module M = Moore M
+            d = flip (curry M.d)
+
+  aggiunzia-divina : ∀ {n}
+    → (Mealy⇒ (mealify-advanceₙ n Mre) Mly) ≅ (Moore⇒ Mre (Queueₙ n ⋉ Mly))
+  aggiunzia-divina {Mre = Mre} {Mly = Mly} = record
+      { to = λ α → let module α = Mealy⇒ α in record
+        { hom = λ x → α.hom (replicate (Mre.s x) , x) , replicate (Mre.s x) --α.hom {! Mly.s  !} , replicate (Mre.s x) --λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; from = λ α → let module α = Moore⇒ α in record
+        { hom = λ f → proj₁ (α.hom (proj₂ f)) --proj₁ (α.hom {! Mre.s  !}) --proj₁ (α.hom (f {! Mre.s  !})) --λ { (s , v) → proj₁ (α.hom s) }
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; to∘from=1 = λ x → let module x = Moore⇒ x in
+          Moore⇒-≡ _ x (extensionality λ x → {! x.s-eq x  !})
+      ; from∘to=1 = λ x → let module x = Mealy⇒ x in
+          Mealy⇒-≡ _ x ((extensionality λ x → {! x.d-eq  !}))
+      }
+    where module Mre = Moore Mre
+          module Mly = Mealy Mly
+
+  aggiunzia-divina-reverse : ∀ {n}
+    → (Mealy⇒ Mly (mealify-advanceₙ n Mre)) ≅ (Moore⇒ (Queueₙ n ⋉ Mly) Mre)
+  aggiunzia-divina-reverse {Mly = Mly} {Mre = Mre} = record
+      { to = λ α → let module α = Mealy⇒ α in record
+        { hom = {!   !} --λ { (s , x ∷ v) → {! α.hom  !} } --α.hom s {! Mre.s  !} } -- λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; from = λ α → let module α = Moore⇒ α in record
+        { hom = λ x → {!   !} --replicate (α.hom (x , {! Mre.s  !})) --λ v → α.hom (x , {! Mre.s  !}) --α.hom (x , replicate (Mre.s (Mre.d ({! Mly.d  !} , α.hom {!   !})))) , {!   !} --λ { (s , v) → proj₁ (α.hom s) }
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; to∘from=1 = λ x → let module x = Moore⇒ x in
+          Moore⇒-≡ _ x (extensionality λ x → {! x.d-eq ?  !})
+      ; from∘to=1 = {!   !}
+      }
+    where module Mre = Moore Mre
+          module Mly = Mealy Mly
+
+
+
+
+  moorify : Mealy A B → Moore A B
+  moorify = Queue ⋉_
+
+  moorify-pre : Mealy A B → Moore A B
+  moorify-pre = _⋊ Queue
+
+  𝕂 : Mealy A B → SMoore A B
+  𝕂 M = record
+    { M = P∞ _ ⋉ M
+    ; isSoft = refl
+    }
+
   e𝕁 : (M : Moore A B) → Mealy (List⁺ A) B
-  e𝕁 M = mealy-ext (mealify M)
+  e𝕁 M = mealy-ext (mealify-advance M)
 
   𝕁𝕃e : (M : Moore A B) → Mealy (List⁺ A) B
-  𝕁𝕃e M = mealify (moore-list⁺-inclusion (moorify (moore-ext M)))
+  𝕁𝕃e M = mealify-advance (moore-list⁺-inclusion (moorify (moore-ext M)))
 
 open Functors
 
@@ -73,9 +138,9 @@ module Fleshouts where
   _ : (let module Mly = Mealy Mly)
     → moorify Mly ≡
     record { E = Mealy.E Mly × B
-          ; d = λ { (a , e , b) → Mly.d (a , e) , Mly.s (a , e)}
-          ; s = λ {(e , b) → b}
-          }
+           ; d = λ { (a , e , b) → Mly.d (a , e) , Mly.s (a , e)}
+           ; s = λ {(e , b) → b}
+           }
   _ = refl
 
   _ : (let module Mly = Mealy Mly)
@@ -96,10 +161,10 @@ module Fleshouts where
   _ = refl
 
   _ : (let module Mre = Moore Mre)
-    → (mealy-ext ∘ mealify) Mre ≡ record
+    → (mealy-ext ∘ mealify-advance) Mre ≡ record
     { E = Moore.E Mre
     ; d = λ { (l , e) → extend (Moore.d Mre) (toList l , e) }
-    ; s = λ { (h ∷ tail , e) → Moore.s Mre (Moore.d Mre  (Data.List.NonEmpty.last (h ∷ tail) ,   extend (Mealy.d (mealify Mre)) (toList (h ∷ tail) , e))) }
+    ; s = λ { (h ∷ tail , e) → Moore.s Mre (Moore.d Mre  (Data.List.NonEmpty.last (h ∷ tail) ,   extend (Mealy.d (mealify-advance Mre)) (toList (h ∷ tail) , e))) }
     }
   _ = refl
 
@@ -127,7 +192,7 @@ module Fleshouts where
 
 module Adjunctions where
 
-  𝕁⊣𝕃 : (M : Moore A B) → (N : Mealy A B) → (Mealy⇒ (mealify M) N) ≅ (Moore⇒ M (moorify N))
+  𝕁⊣𝕃 : (M : Moore A B) → (N : Mealy A B) → (Mealy⇒ (mealify-advance M) N) ≅ (Moore⇒ M (moorify N))
   𝕁⊣𝕃 M N = let module M = Moore M
                 module N = Mealy N in record
     { to = λ α → let module α = Mealy⇒ α in record
@@ -145,13 +210,32 @@ module Adjunctions where
     ; from∘to=1 = λ x → Mealy⇒-≡ _ x refl
     }
 
+  𝕁⊣𝕃' : (M : Moore A B) → (N : Mealy A B) →  (Mealy⇒ N ({!   !} M)) ≅ (Moore⇒ (moorify N) M)
+  𝕁⊣𝕃' M N = let module M = Moore M
+                 module N = Mealy N in record
+    { to = λ α → let module α = Mealy⇒ α in record
+      { hom  = λ { m → {!   !} } -- α.hom x , M.s x
+      ; d-eq = λ { g → {!   !} } --(a , e) → cong₂ _,_ (α.d-eq _) {! sym (α.s-eq (a , e))  !} } --λ {(a , e) → cong₂ _,_ (α.d-eq (a , e)) (sym (α.s-eq (a , e)))}
+      ; s-eq = {!   !} --λ x → refl
+      }
+    ; from = λ β → let module β = Moore⇒ β in record
+      { hom  = λ n → {!   !} --proj₁ ∘ β.hom --λ x → proj₁ (β.hom x)
+      ; d-eq = {!   !} --λ {(a , e) → cong proj₁ (β.d-eq (a , e))}
+      ; s-eq = {!   !} --λ {(a , e) → trans (sym (cong proj₂ (β.d-eq (a , e)))) (β.s-eq (β.X.d (a , e)))}
+      }
+    ; to∘from=1 = λ x → let module x = Moore⇒ x
+                         in Moore⇒-≡ _ x {!   !} --λ x → let module x = Moore⇒ x
+                    --        in Moore⇒-≡ _ x (extensionality (λ t → sym (cong (λ b → proj₁ (x.hom t) , b) (x.s-eq t))))
+    ; from∘to=1 = λ x → Mealy⇒-≡ _ x {!   !}
+    }
+
   module AdjunctionsExperiments where
 
-    i⊣𝕂 : (M : Moore A B) → (acep : Acephalous M) → (N : Moore A B) → (Moore⇒ M N) ≅ (Moore⇒ M (P∞ _ ⋈ N))
-    i⊣𝕂 M acep N = let module M = Moore M
+    i⊣𝕂 : (M : Moore A B) → (soft : Soft M) → (N : Moore A B) → (Moore⇒ M N) ≅ (Moore⇒ M (P∞ _ ⋈ N))
+    i⊣𝕂 M soft N = let module M = Moore M
                        module N = Moore N in record
       { to = λ α → let module α = Moore⇒ α in record { hom = λ x → (α.hom x) , (homP∞ (α.X.s x))
-        ; d-eq = λ {(a , e) → cong₂ _,_ (α.d-eq (a , e)) (cong homP∞ (acep))}
+        ; d-eq = λ {(a , e) → cong₂ _,_ (α.d-eq (a , e)) (cong homP∞ (soft))}
         ; s-eq = λ {e → refl} }
       ; from = λ β → let module β = Moore⇒ β in record { hom = λ x → proj₁ (β.hom x)
         ; d-eq = λ {(a , e) → cong proj₁ (β.d-eq (a , e)) }
@@ -196,9 +280,9 @@ equ = record {
 -- ix -> 𝕃y
 -- x -> KLy => KL ≅ L'
 
-𝕁²⊣𝕃² : (M : Moore A B) → (N : Mealy A B) → (Mealy⇒ (𝕁² M) N) ≅ (Moore⇒ M (Queue ⋈ (moorify N)))
-𝕁²⊣𝕃² M N = let module M = Moore M
-                module N = Mealy N in
+mealify-advance₂⊣𝕃² : (M : Moore A B) → (N : Mealy A B) → (Mealy⇒ (mealify-advance₂ M) N) ≅ (Moore⇒ M (Queue ⋈ (moorify N)))
+mealify-advance₂⊣𝕃² M N = let module M = Moore M
+                              module N = Mealy N in
   record { to = λ α → let module α = Mealy⇒ α in
             record { hom = λ {x → ({! α.hom   !} , {!   !}) , {!   !}}
                    ; d-eq = λ {(a , e) → {!  α.s-eq (a , e) !}}
@@ -222,7 +306,7 @@ morphism? M = record
   ; s-eq = λ {((e , b') , b) → refl}
   }
 
-quadrato : ∀ {M : Moore A B} → Mealy[ toList , id ] (moore-ext M) ≡ mealy-ext (mealify M)
+quadrato : ∀ {M : Moore A B} → Mealy[ toList , id ] (moore-ext M) ≡ mealy-ext (mealify-advance M)
 quadrato {M = record { E = E ; d = d ; s = s }} = {!   !}
 
 morphism2? : (M : Moore A B) → Mealy⇒ (e𝕁 M) (𝕁𝕃e M)
