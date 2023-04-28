@@ -18,7 +18,7 @@ open import Categories.Category.Monoidal
 open import Categories.Category.Cartesian.Bundle
 
 module Mealy.Bicategory {o l e} (C : CartesianCategory o l e) where
-{-
+
 open import Mealy C
 
 open CartesianCategory C
@@ -437,4 +437,3 @@ MealyBicategory = record
  ; triangle = Cartesian-Monoidal.triangle
  ; pentagon = Cartesian-Monoidal.pentagon
  }
--}
