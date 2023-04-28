@@ -1,4 +1,3 @@
-
 module Set.Adjoints where
 
 open import Data.Product using (_,_; _×_; proj₁; proj₂; curry)
@@ -29,7 +28,7 @@ module Functors where
   mealify M = record
     { E = M.E
     ; d = M.d
-    ; s = λ { (_ , s) → M.s s }
+    ; s = M.s ∘ proj₂
     } where module M = Moore M
 
   mealify-advance : Moore A B → Mealy A B
@@ -45,58 +44,6 @@ module Functors where
     ; d = λ {(a , a' , e) → a , M.d (a' , e)}
     ; s = λ {(a , a' , e) → M.s (M.d (a , M.d (a' , e)))}
     }
-
-  mealify-advanceₙ : ℕ → Moore A B → Mealy A B
-  mealify-advanceₙ {A} {B} n M = record
-    { E = Vec B n × M.E
-    ; d = λ { (a , f) → {!   !} }
-    ; s = λ { (a , g) → M.s {!   !} }
-    } where module M = Moore M
-            d = flip (curry M.d)
-
-  aggiunzia-divina : ∀ {n}
-    → (Mealy⇒ (mealify-advanceₙ n Mre) Mly) ≅ (Moore⇒ Mre (Queueₙ n ⋉ Mly))
-  aggiunzia-divina {Mre = Mre} {Mly = Mly} = record
-      { to = λ α → let module α = Mealy⇒ α in record
-        { hom = λ x → α.hom (replicate (Mre.s x) , x) , replicate (Mre.s x) --α.hom {! Mly.s  !} , replicate (Mre.s x) --λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
-        ; d-eq = {!   !}
-        ; s-eq = {!   !}
-        }
-      ; from = λ α → let module α = Moore⇒ α in record
-        { hom = λ f → proj₁ (α.hom (proj₂ f)) --proj₁ (α.hom {! Mre.s  !}) --proj₁ (α.hom (f {! Mre.s  !})) --λ { (s , v) → proj₁ (α.hom s) }
-        ; d-eq = {!   !}
-        ; s-eq = {!   !}
-        }
-      ; to∘from=1 = λ x → let module x = Moore⇒ x in
-          Moore⇒-≡ _ x (extensionality λ x → {! x.s-eq x  !})
-      ; from∘to=1 = λ x → let module x = Mealy⇒ x in
-          Mealy⇒-≡ _ x ((extensionality λ x → {! x.d-eq  !}))
-      }
-    where module Mre = Moore Mre
-          module Mly = Mealy Mly
-
-  aggiunzia-divina-reverse : ∀ {n}
-    → (Mealy⇒ Mly (mealify-advanceₙ n Mre)) ≅ (Moore⇒ (Queueₙ n ⋉ Mly) Mre)
-  aggiunzia-divina-reverse {Mly = Mly} {Mre = Mre} = record
-      { to = λ α → let module α = Mealy⇒ α in record
-        { hom = {!   !} --λ { (s , x ∷ v) → {! α.hom  !} } --α.hom s {! Mre.s  !} } -- λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
-        ; d-eq = {!   !}
-        ; s-eq = {!   !}
-        }
-      ; from = λ α → let module α = Moore⇒ α in record
-        { hom = λ x → {!   !} --replicate (α.hom (x , {! Mre.s  !})) --λ v → α.hom (x , {! Mre.s  !}) --α.hom (x , replicate (Mre.s (Mre.d ({! Mly.d  !} , α.hom {!   !})))) , {!   !} --λ { (s , v) → proj₁ (α.hom s) }
-        ; d-eq = {!   !}
-        ; s-eq = {!   !}
-        }
-      ; to∘from=1 = λ x → let module x = Moore⇒ x in
-          Moore⇒-≡ _ x (extensionality λ x → {! x.d-eq ?  !})
-      ; from∘to=1 = {!   !}
-      }
-    where module Mre = Moore Mre
-          module Mly = Mealy Mly
-
-
-
 
   moorify : Mealy A B → Moore A B
   moorify = Queue ⋉_
@@ -176,6 +123,7 @@ module Fleshouts where
     }
   _ = refl
 
+  {-
   _ : (let module Mly = Mealy Mly)
     → (moore-list⁺-ext ∘ moorify ∘ mealy-ext) Mly ≡
     record { E = (Mealy.E Mly) × B
@@ -189,6 +137,7 @@ module Fleshouts where
           ; d = λ { (a , (e , b) , e') → {!  !} }
           ; s = λ { (e , e') → e' } }
   _ = refl
+  -}
 
 module Adjunctions where
 
@@ -210,6 +159,7 @@ module Adjunctions where
     ; from∘to=1 = λ x → Mealy⇒-≡ _ x refl
     }
 
+  {-
   𝕁⊣𝕃' : (M : Moore A B) → (N : Mealy A B) →  (Mealy⇒ N ({!   !} M)) ≅ (Moore⇒ (moorify N) M)
   𝕁⊣𝕃' M N = let module M = Moore M
                  module N = Mealy N in record
@@ -228,6 +178,7 @@ module Adjunctions where
                     --        in Moore⇒-≡ _ x (extensionality (λ t → sym (cong (λ b → proj₁ (x.hom t) , b) (x.s-eq t))))
     ; from∘to=1 = λ x → Mealy⇒-≡ _ x {!   !}
     }
+    -}
 
   module AdjunctionsExperiments where
 
@@ -280,6 +231,7 @@ equ = record {
 -- ix -> 𝕃y
 -- x -> KLy => KL ≅ L'
 
+{-
 mealify-advance₂⊣𝕃² : (M : Moore A B) → (N : Mealy A B) → (Mealy⇒ (mealify-advance₂ M) N) ≅ (Moore⇒ M (Queue ⋈ (moorify N)))
 mealify-advance₂⊣𝕃² M N = let module M = Moore M
                               module N = Mealy N in
@@ -316,3 +268,53 @@ morphism2? M = let module M = Moore M in record
             ; (a ∷ x ∷ as , e) → {!   !} } --cong₂ _,_ (cong (λ t → M.d (a , t)) (cong (λ p → M.d (x , p)) {!   !})) (cong (λ t → M.s (M.d (a , t))) {!   !})}
   ; s-eq = λ {(a ∷ as , e) → {!   !}}
   }
+
+  mealify-advanceₙ : ℕ → Moore A B → Mealy A B
+  mealify-advanceₙ {A} {B} n M = record
+    { E = Vec B n × M.E
+    ; d = λ { (a , f) → {!   !} }
+    ; s = λ { (a , g) → M.s {!   !} }
+    } where module M = Moore M
+            d = flip (curry M.d)
+
+  aggiunzia-divina : ∀ {n}
+    → (Mealy⇒ (mealify-advanceₙ n Mre) Mly) ≅ (Moore⇒ Mre (Queueₙ n ⋉ Mly))
+  aggiunzia-divina {Mre = Mre} {Mly = Mly} = record
+      { to = λ α → let module α = Mealy⇒ α in record
+        { hom = λ x → α.hom (replicate (Mre.s x) , x) , replicate (Mre.s x) --α.hom {! Mly.s  !} , replicate (Mre.s x) --λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; from = λ α → let module α = Moore⇒ α in record
+        { hom = λ f → proj₁ (α.hom (proj₂ f)) --proj₁ (α.hom {! Mre.s  !}) --proj₁ (α.hom (f {! Mre.s  !})) --λ { (s , v) → proj₁ (α.hom s) }
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; to∘from=1 = λ x → let module x = Moore⇒ x in
+          Moore⇒-≡ _ x (extensionality λ x → {! x.s-eq x  !})
+      ; from∘to=1 = λ x → let module x = Mealy⇒ x in
+          Mealy⇒-≡ _ x ((extensionality λ x → {! x.d-eq  !}))
+      }
+    where module Mre = Moore Mre
+          module Mly = Mealy Mly
+
+  aggiunzia-divina-reverse : ∀ {n}
+    → (Mealy⇒ Mly (mealify-advanceₙ n Mre)) ≅ (Moore⇒ (Queueₙ n ⋉ Mly) Mre)
+  aggiunzia-divina-reverse {Mly = Mly} {Mre = Mre} = record
+      { to = λ α → let module α = Mealy⇒ α in record
+        { hom = {!   !} --λ { (s , x ∷ v) → {! α.hom  !} } --α.hom s {! Mre.s  !} } -- λ s → (α.hom (s , {!   !})) , replicate (Mre.s s)
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; from = λ α → let module α = Moore⇒ α in record
+        { hom = λ x → {!   !} --replicate (α.hom (x , {! Mre.s  !})) --λ v → α.hom (x , {! Mre.s  !}) --α.hom (x , replicate (Mre.s (Mre.d ({! Mly.d  !} , α.hom {!   !})))) , {!   !} --λ { (s , v) → proj₁ (α.hom s) }
+        ; d-eq = {!   !}
+        ; s-eq = {!   !}
+        }
+      ; to∘from=1 = λ x → let module x = Moore⇒ x in
+          Moore⇒-≡ _ x (extensionality λ x → {! x.d-eq ?  !})
+      ; from∘to=1 = {!   !}
+      }
+    where module Mre = Moore Mre
+          module Mly = Mealy Mly
+-}
