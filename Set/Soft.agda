@@ -21,7 +21,6 @@ record SMoore (I : Set) (O : Set) : Set₁ where
     M : Moore I O
     isSoft : Soft M
 
-
 {-
        ┌─────────────┐   ┌─────────────┐
        │             │   │  Soft      │

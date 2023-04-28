@@ -94,7 +94,7 @@ idMealy {A} = record
   ; s = λ { (a , tt) → a }
   }
 
-Mealy[_,_] : (f : A′ → A) → (g : B → B′) → Mealy A B → Mealy A′ B′
+Mealy[_,_] : (A′ → A) → (B → B′) → Mealy A B → Mealy A′ B′
 Mealy[ f , g ] M = let module M = Mealy M in record
   { E = M.E
   ; d = λ { (a , e) → M.d (f a , e) }

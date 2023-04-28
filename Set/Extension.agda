@@ -23,14 +23,14 @@ abstract
       extend-curried d []       s = s
       extend-curried d (x ∷ xs) s = extend-curried d xs (d (x , s))
 
-moore-ext : (M : Moore A B) → Mealy (List A) B
+moore-ext : Moore A B → Mealy (List A) B
 moore-ext {A} {B} M = let module M = Moore M in record
   { E = M.E
   ; d = extend M.d
   ; s = M.s ∘ extend M.d
   }
 
-mealy-ext : (M : Mealy A B) → Mealy (List⁺ A) B
+mealy-ext : Mealy A B → Mealy (List⁺ A) B
 mealy-ext {A} {B} M = let module M = Mealy M in record
   { E = M.E
   ; d = extend M.d ∘ map₁ toList
