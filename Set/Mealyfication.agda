@@ -12,10 +12,10 @@ open import Data.Vec using (Vec; head; _∷ʳ_; _∷_; foldl; replicate)
 open import Set.Automata
 open import Set.LimitAutomata
 open import Set.Soft
-open import Set.Utils
 open import Set.Equality
 open import Set.Extension
 open import Set.Functors
+open import Set.Utils
 
 private
   variable
