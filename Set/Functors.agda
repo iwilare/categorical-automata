@@ -80,13 +80,9 @@ module ExtensionFunctors where
   mealy-ext {A} {B} M = record
     { E = M.E
     ; d = extend M.d ∘ map₁ toList
-    ; s = extend-s-mealy --λ { (xs , s) → M.s (last xs , extend M.d (toList xs , s)) }
+    ; s = λ { (xs , s) → M.s (last xs , extend M.d (toList xs , s)) }
     } where
       module M = Mealy M
-
-      extend-s-mealy : _
-      extend-s-mealy (xs , s) with snocView xs
-      ... | xs ∷ʳ′ x = M.s (x , extend M.d (xs , s))
 
   moore-list⁺-inclusion : Moore (List A) B → Moore (List⁺ A) B
   moore-list⁺-inclusion M = record
@@ -112,45 +108,11 @@ e𝕁 M = mealy-ext (mealify-advance M)
 𝕁𝕃e : Moore A B → Mealy (List⁺ A) B
 𝕁𝕃e M = mealify-advance (moore-list⁺-inclusion (moorify (moore-ext M)))
 
-Bᵗ* : Mealy (List⁺ A) B → Mealy (List A) B
-Bᵗ* {B = B} record { E = E ; d = d ; s = s } = record
-  { E = E × B
-  ; d =
-     λ { ([] , e)    → e
-       ; (x ∷ l , fst , snd) → d (x ∷ l , fst) , s (x ∷ l , fst) --s {!   !}
-       }
-  ; s =
-    λ { ([] , e , b)     → b
-      ; (x ∷ xs , e , b) → s (x ∷ xs , e)
-      }
-  }
-
 -- Lemma: extending and converting a Moore machine is the same as
 -- first converting to Mealy machine and then extend it as Mealy.
 extend-convert-moore : ∀ {Mre : Moore A B}
   → Mealy[ toList , id ] (moore-ext Mre) ≡ mealy-ext (mealify Mre)
-extend-convert-moore {Mre = Mre} = Mealy-ext (λ x → refl)  s-eq
-  where
-    s-eq : _
-    s-eq (xs , p) with snocView xs
-    ... | xs ∷ʳ′ x = cong (λ x → Moore.s Mre (extend _ (x , p))) {!   !}
-
-pseudo-extend-convert-mealy₁ : ∀ {Mly : Mealy A B}
-  → Mealy⇒ (Bᵗ* (mealy-ext Mly)) (moore-ext (moorify Mly))
-pseudo-extend-convert-mealy₁ {A = A} {B = B} {Mly = Mly} = record
-  { hom = λ { (fst , snd) → fst , snd }
-  ; d-eq = λ { ([] , e , b) → sym extend-nil
-             ; (x ∷ xs , e , b) → {!   !} }
-  ; s-eq = λ { ([] , fst₁ , snd) → {!   !}
-             ; (x ∷ fst , fst₁ , snd) → {! thm  !} }
-  } where module Mly = Mealy Mly
-          thm : ∀ {x} {xs : List _} {e : Mly.E} {b : B}
-              → (Mealy.d (Bᵗ* (mealy-ext Mly)) (x ∷ xs , e , b))
-                 ≡
-                 Mealy.d (moore-ext (moorify Mly))
-                 (x ∷ xs , e , b)
-          thm {x} {xs} with snocView (x ∷ xs)
-          ... | xs ∷ʳ′ x = {!   !}
+extend-convert-moore {Mre = Mre} = refl
 
 module Fleshouts where
   _ : (let module Mly = Mealy Mly)
@@ -200,7 +162,7 @@ module Fleshouts where
     ; d = λ { (l , e) → extend (Moore.d Mre) (toList l , e) }
     ; s = λ { (h ∷ tail , e) → Moore.s Mre (Moore.d Mre  (Data.List.NonEmpty.last (h ∷ tail) ,   extend (Mealy.d (mealify-advance Mre)) (toList (h ∷ tail) , e))) }
     }
-  _ = {!   !}
+  _ = refl
 
   _ : (let module Mre = Moore Mre)
     → (Mealy[ toList , id ] ∘ moore-ext) Mre ≡ record
