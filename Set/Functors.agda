@@ -1,8 +1,8 @@
 module Set.Functors where
 
-open import Data.Product using (_,_; _×_; proj₁; proj₂; curry)
+open import Data.Product using (_,_; _×_; proj₁; proj₂; curry; map₂; map₁)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong₂; cong; trans; sym)
-open import Data.List.NonEmpty using (List⁺; _∷_; _∷⁺_; toList; [_])
+open import Data.List.NonEmpty using (List⁺; _∷_; _∷⁺_; toList; [_]; last)
 open import Data.List using (List; []; _∷_)
 open import Function using (id; _∘_; flip)
 open import Data.Nat using (ℕ)
@@ -14,7 +14,6 @@ open import Set.LimitAutomata
 open import Set.Soft
 open import Set.Utils
 open import Set.Equality
-open import Set.Extension
 
 private
   variable
@@ -55,11 +54,69 @@ moorify-pre = _⋊ Queue
   ; isSoft = refl
   }
 
+module ExtensionFunctors where
+
+  -- extensions of Moore and Mealy machines
+
+  abstract
+    extend : (I × A → A) → (List I × A → A)
+    extend d (is , s) = extend-curried d is s
+      where
+        extend-curried : (I × A → A) → List I → A → A
+        extend-curried d []       s = s
+        extend-curried d (x ∷ xs) s = extend-curried d xs (d (x , s))
+
+  moore-ext : Moore A B → Mealy (List A) B
+  moore-ext {A} {B} M = let module M = Moore M in record
+    { E = M.E
+    ; d = extend M.d
+    ; s = M.s ∘ extend M.d
+    }
+
+  mealy-ext : Mealy A B → Mealy (List⁺ A) B
+  mealy-ext {A} {B} M = let module M = Mealy M in record
+    { E = M.E
+    ; d = extend M.d ∘ map₁ toList
+    ; s = λ { (xs , s) → M.s (last xs , extend M.d (toList xs , s)) }
+    }
+
+  moore-list⁺-inclusion : Moore (List A) B → Moore (List⁺ A) B
+  moore-list⁺-inclusion M = record
+    { E = M.E
+    ; d = M.d ∘ map₁ toList
+    ; s = M.s
+    } where module M = Moore M
+
+  moore-list⁺-ext : Moore (List⁺ A) B → Moore (List A) B
+  moore-list⁺-ext M = record
+    { E = M.E
+    ; d = λ { ([]    , s) → s
+            ; (x ∷ i , s) → M.d (x ∷ i , s)
+            }
+    ; s = M.s
+    } where module M = Moore M
+
+open ExtensionFunctors
+
 e𝕁 : Moore A B → Mealy (List⁺ A) B
 e𝕁 M = mealy-ext (mealify-advance M)
 
 𝕁𝕃e : Moore A B → Mealy (List⁺ A) B
 𝕁𝕃e M = mealify-advance (moore-list⁺-inclusion (moorify (moore-ext M)))
+
+Bᵗ* : Mealy (List⁺ A) B → Mealy (List A) B
+Bᵗ* {B = B} record { E = E ; d = d ; s = s } = record
+  { E = B × E
+  ; d = λ { ([] , e)            → e
+          ; (x ∷ l , fst , snd) → s (x ∷ l , snd) , d (x ∷ l , snd) }
+  ; s = λ { ([] , b , e)     → b
+          ; (x ∷ xs , b , e) → s (x ∷ xs , e)
+          }
+  }
+
+extend-convert : ∀ {Mre : Moore A B}
+  → Mealy[ toList , id ] (moore-ext Mre) ≡ mealy-ext (mealify Mre)
+extend-convert = refl
 
 module Fleshouts where
   _ : (let module Mly = Mealy Mly)

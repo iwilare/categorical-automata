@@ -1,6 +1,6 @@
 module Set.LimitAutomata where
 
-open import Data.Product using (_,_; _×_)
+open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Data.List.NonEmpty using (List⁺; _∷⁺_; toList; [_])
 open import Data.List using (List; [];  _∷_)
@@ -65,7 +65,7 @@ module P∞ A = Moore (P∞ A)
 Queue : Moore A A
 Queue {A} = record
   { E = A
-  ; d = λ { (i , _) → i }
+  ; d = proj₁
   ; s = λ x → x
   }
 

@@ -75,3 +75,6 @@ module Adjunctions where
     ; to∘from=1 = λ {(fst , snd) → refl} -- can be done
     ; from∘to=1 = λ {((a , b) , snd) → cong₂ _,_  (cong₂ _,_ refl {!   !}) refl} -- can be done?
     }
+
+  quadrato : ∀ {M : Moore A B} → Mealy[ toList , id ] (moore-ext M) ≡ mealy-ext (mealify-advance M)
+  quadrato {M = record { E = E ; d = d ; s = s }} = {! refl  !}
