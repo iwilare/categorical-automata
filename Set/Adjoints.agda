@@ -14,7 +14,6 @@ open import Set.LimitAutomata
 open import Set.Soft
 open import Set.Utils
 open import Set.Equality
-open import Set.Extension
 open import Set.Functors
 
 private
@@ -51,7 +50,7 @@ module Adjunctions where
       ; s-eq = λ {e → refl} }
     ; from = λ β → let module β = Moore⇒ β in record { hom = λ x → proj₁ (β.hom x)
       ; d-eq = λ {(a , e) → cong proj₁ (β.d-eq (a , e)) }
-      ; s-eq = λ {e → trans {!   !} (β.s-eq e) } }
+      ; s-eq = λ {e → trans _ (β.s-eq e) } }
     ; to∘from=1 = λ {x → let module x = Moore⇒ x in
                   Moore⇒-≡ _ x (extensionality λ t
                                   → cong (λ v → (proj₁ (x.hom t) , v))
@@ -68,13 +67,3 @@ module Adjunctions where
                   ; (x ∷ tail) → x}
           ; eq = λ t → refl
           }
-  KL≅L' : (M : Mealy A B) → (Moore.E (P∞ _ ⋈ (moorify M))) ≅ (Moore.E (P∞ _ ⋉ M))
-  KL≅L' M = let module M = Mealy M in record
-    { to = λ {((e , b) , f) → e , f}
-    ; from = λ {(e , f) → (e , P∞carrier.f f []) , f}
-    ; to∘from=1 = λ {(fst , snd) → refl} -- can be done
-    ; from∘to=1 = λ {((a , b) , snd) → cong₂ _,_  (cong₂ _,_ refl {!   !}) refl} -- can be done?
-    }
-
-  quadrato : ∀ {M : Moore A B} → Mealy[ toList , id ] (moore-ext M) ≡ mealy-ext (mealify-advance M)
-  quadrato {M = record { E = E ; d = d ; s = s }} = {! refl  !}

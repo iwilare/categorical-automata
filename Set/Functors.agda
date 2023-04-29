@@ -100,7 +100,7 @@ module ExtensionFunctors where
     ; s = M.s
     } where module M = Moore M
 
-open ExtensionFunctors
+open ExtensionFunctors public
 
 e𝕁 : Moore A B → Mealy (List⁺ A) B
 e𝕁 M = mealy-ext (mealify-advance M)
