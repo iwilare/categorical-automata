@@ -114,6 +114,8 @@ Bᵗ* {B = B} record { E = E ; d = d ; s = s } = record
           }
   }
 
+-- Lemma: extending and converting a Moore machine is the same as
+-- first converting to Mealy machine and then extend it as Mealy.
 extend-convert : ∀ {Mre : Moore A B}
   → Mealy[ toList , id ] (moore-ext Mre) ≡ mealy-ext (mealify Mre)
 extend-convert = refl
