@@ -17,6 +17,7 @@ open import Categories.Category.Monoidal
 
 open import Categories.Category.Cartesian.Bundle
 
+-- The bicategory of Mealy machines
 module Mealy.Bicategory {o l e} (C : CartesianCategory o l e) where
 
 open import Mealy C
