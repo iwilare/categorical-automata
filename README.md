@@ -1,6 +1,6 @@
 # Categorical automata in Agda
 
-This repository contains the Agda formalization for a series of papers by Guido Boccali, Andrea Laretto, Fosco Loregian, Stefano Luneia and Bojana Femić on categorical automata in monoidal and cartesian (bi)categories.
+This repository contains the Agda formalization for a series of papers by Guido Boccali, Andrea Laretto, Fosco Loregian, Stefano Luneia and Bojana Femić on categorical automata in monoidal and cartesian categories and how they are organized (semi)bicategorically.
 
 - "Bicategories of automata, automata in bicategories" (https://arxiv.org/pdf/2303.03865.pdf)
 - "Completeness for categories of generalized automata" (https://arxiv.org/pdf/2303.03867.pdf)
