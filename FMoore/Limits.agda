@@ -16,11 +16,9 @@ open import Categories.Adjoint
 open import Data.Nat using (ℕ; suc; zero)
 open import Relation.Binary.PropositionalEquality
 
-
--- if F is left adjoint, and C has pullbacks, then FMach has products (and then equalizers)
+-- if F is left adjoint, and C has pullbacks, then FMoore has products
 module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Category.Obj C)
                      {R : Functor C C} (adj : F ⊣ R) (complete : ∀ {o ℓ e} → Complete o ℓ e C) where
-
 
   open import FMoore F O
 
@@ -41,10 +39,8 @@ module FMoore.Limits {o l e} {C : Category o l e} (F : Functor C C) (O : Categor
 
   open HelperPullbacks
 
-  open import FMoore.CustomPullbackLimits C
-
   open import Categories.Object.Product.Indexed.Properties C
-  open import Categories.Diagram.Pullback.Limit C
+  open import Categories.Diagram.Pullback.FromLimit C
 
   module R = Functor R
 

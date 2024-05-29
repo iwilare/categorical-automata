@@ -3,7 +3,7 @@
 open import Level
 open import Categories.Category.Core using (Category)
 
-module FMoore.CustomPullbackLimits {o ℓ e} (C : Category o ℓ e) where
+module Categories.Diagram.Pullback.FromLimit {o ℓ e} (C : Category o ℓ e) where
 
 open import Data.Product using (∃₂; _,_)
 open import Function.Base using (_$_)

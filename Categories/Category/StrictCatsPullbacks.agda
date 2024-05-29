@@ -137,6 +137,7 @@ Cats-Pullback {o} {ℓ} {e} {A} {B} {E} F G =
       ; homomorphism = B.Equiv.refl
       ; F-resp-≈ = proj₂
       }
+
     universal : {A = A₁ : Category o (ℓ ⊔ e) e} {h₁ : Functor A₁ A}
       {h₂ : Functor A₁ B} →
       F ∘F h₁ ≡F G ∘F h₂ → Functor A₁ (Cats-Pullback-Cat {o} {ℓ ⊔ e} {e} {A} {B} {E} F G)
